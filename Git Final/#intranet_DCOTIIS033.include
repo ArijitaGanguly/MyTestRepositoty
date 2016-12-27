@@ -1,0 +1,98 @@
+<project name="devinclude"> 
+	<!-- Common Configuration -->
+	<property name="svn.installed.path"		value="\\grvs37\subversion"/>
+	<property name="verbose" value="true"/>	
+	<property name="backup.dir"		value="..\..\backups"/>
+	<property name="environment.variables" value="AIMCOWeb~E:\AIMCOWEB"/>
+	<property name="root.dir" value="E:"/>
+	<property name="temp.sourcecode.build.output.dir" value="E:\NANT_Temp"/>
+	<property name="service.account.userid" value="AIMCO\_DCOTIIS033"/>
+	<property name="service.account.password" value="15338C054768227843B67C3BA37617B2"/>
+	<property name="deployment.environment" value="QA"/>
+	<property name="merge.with.branch" value="true"/>
+	
+	<!-- IIS Configuration -->
+	<property name="iis.website"		value="stageintranet2015.aimco.com"/>
+	<property name="iis.base.dir"		value="E:\inetpub"/>
+	<property name="iis.prod.dir"		value="${iis.base.dir}\intranet.aimco.com"/>
+	<property name="iis.is80"		value="true"/>
+	<property name="iis.contentdir"		value="E:\Inetpub\intranet.aimco.com_content"/>
+
+	<!-- Website Configuration -->
+	<property name="website.repos"		value="http://subversion.aimco.com/svn/WebDev/apps_rationalization/AimcoWebApps/Trunk/Source/AimcoApps/Intranet.Aimco.Com"/>
+	<property name="website.revision.to"		value="HEAD"/>
+	<property name="website.deploy.dir"		value="${iis.prod.dir}" />
+	<property name="anonymous.auth.enable.project"		value="AccessWS," />
+	<property name="website.asp.convert.to.app"		value="DocLib,Survey,UAConfigSettings" />
+	<property name="website.default.page" value="CrystalReport~Default.aspx|AccessWS~AccessWS.asmx|Angela~Angela.aspx|Inquiries~Inquiries.aspx|InquiriesSource~Default.aspx|UAConfigSettings~Default.aspx|Lease_Commissions~Default.aspx|RpmSiteVisit~default.aspx|MomentsThatMatter~Default.aspx|ITOnCall~Default.aspx|Tapestry~Default.aspx" />
+	<property name="website.application.level.deployment" value="Announcements~PropertyAdmin|eBizAdmin~PropertyAdmin|Mapping~PropertyAdmin|ImageUpload~PropertyAdmin|DocumentUpload~PropertyAdmin|ExchangeOptionAdmin~Employee" />
+	<property name="website.private.IP" value="*" />
+	<!-- Content VD -->
+	<property name="website.content.vd.required.root"		value="AccountingStandards,aimcoba,Announcements,ConstructionSvs,corp_memos,data,DocLib_Uploads,Downloads,FocusInfo,Forms,HR,HRTraining,Marketing,OnlineHelp,Payroll,PeopleSoft,PM,Policies,Redevelopment,Tax" />
+	<property name="website.content.vd.required.app.lebel"		value="NeighborWatch~Documents|UAConfigSettings~UAConfigSettings\uploads|Dispositions~Dispositions\DispoPropReports|Dispositions~Dispositions\DispositionPDFs" />
+		
+	<!-- Apppool Configuration -->
+	<property name="default.root.app.pool" value="IntranetDefaultAppPool"/>
+	<property name="app.pool.clasic.asp" value="IntranetDefaultAppPool"/>
+	<property name="app.pool.net45" value="IntranetAppPool4.5"/>
+	<property name="app.pool.bit32.net45" value="Intranet32bitAppPool4.5"/>
+	<property name="bit32.required.app" value="UAConfigSettings"/>
+	
+	<!-- GAC Configuration -->
+	<property name="gac.repos"		value="http://subversion.aimco.com/svn/WebDev/apps_rationalization/Application/Trunk/Source/GAC"/>	
+	<property name="gac.revision.to"		value="HEAD"/>
+	<property name="gac.deploy.dir"		value="E:\AIMCOWEB\NetDLL" />
+		
+	<!-- COM Configuration -->
+	<property name="com.repos"		value="http://subversion.aimco.com/svn/WebDev/apps_rationalization/Application/Trunk/Deployable/DLLs/COM"/>
+	<property name="com.revision.to"		value="HEAD"/>	
+	<property name="com.deploy.dir"		value="E:\AIMCOWEB\Components" />
+	<property name="com.admin.ad.projects"	 value="MTS_ADSI,ExchAdmin" />
+	<property name="com.admin.userid"	 value="AIMCO\_Intranet" />
+	<property name="com.admin.password"	 value="C5B72AA95AE66E60E02305D5EBDBAA6F" />
+	
+	<!-- Windows Service Configuration -->
+	<property name="wins.repos"		value="http://subversion.aimco.com/svn/WebDev/apps_rationalization/Application/Trunk/Source/Services"/>
+	<property name="wins.revision.to"		value="HEAD"/>	
+	<property name="wins.deploy.dir"		value="E:\AIMCOWEB\Apps" />
+	
+	<!-- EXE Configuration -->
+	<property name="exe.repos"		value="http://subversion.aimco.com/svn/WebDev/apps_rationalization/Application/Trunk/Source/Executables/AimcoJobComponents"/>
+	<property name="exe.revision.to"		value="HEAD"/>	
+	<property name="exe.deploy.dir"		value="E:\AimcoWeb\Apps" />
+	
+	<!-- Schedule Task Configuration -->
+	<property name="schedule.repos"		value="http://subversion.aimco.com/svn/WebDev/apps_rationalization/Application/Trunk/Source/Executables/AimcoScheduledTasks"/>
+	<property name="schedule.revision.to"		value="HEAD"/>	
+	<property name="schedule.deploy.dir"		value="E:\AIMCOWEB\Apps" />
+	
+	<!-- Config File Configuration -->
+	<property name="config.file.repos"		value="http://subversion.aimco.com/svn/WebDev/apps_rationalization/Application/Trunk/Deployable/Configuration File"/>
+	<property name="application.config.dir" 	value="E:\AIMCOWEB\config"/>
+	<property name="config.revision.to"		value="HEAD"/>
+	
+	<!-- SQL File Configuration -->
+	<property name="sql.file.repos"		value="http://subversion.aimco.com/svn/WebDev/apps_rationalization/Application/Trunk/Deployable/SQL"/>
+	<property name="sql.connection.string.path"		value="${application.config.dir}"/>
+	<property name="sql.connection.string.path"		value="-S DCOCSQL113"/>	
+	<property name="sql.revision.to"		value="HEAD"/>
+	
+	<!-- Parametrized Values of intranet.aimco.com -->
+	<property name="Disposition_DB_Source"  value="DCOTSQL113"/>
+	<property name="Lease_Commissions_TestingEmail_To"  value="kamalesh.gupta@aimco.com;debarati.bosu@aimco.com "/>
+	<property name="Lease_Commissions_Access_Url"  value="http://stageintranet2015.aimco.com/AccessWS/AccessWS.asmx"/>
+	<property name="nsf_Access_Url"  value="http://stageintranet2015.aimco.com/AccessWS/AccessWS.asmx"/>
+	<property name="Tapestry_Intranet_DB_Source"  value="DCOTSQL113"/>
+	<property name="UAConfigSettings_EmailNotificationGroup"  value="kamalesh.gupta@aimco.com"/>
+	<property name="UAConfigSettings_EmailNotificationReportURL"  value="http://stageintranet2015.aimco.com/uaconfigsettings/ExceptionReport.aspx"/>
+	<!-- Mail Notification Configuration -->
+	<property name="mail.send.required"	value="false"/>	
+	<property name="email.to.list"		value="pinaki.ghosh@aimco.com;sam.elliott@aimco.com;rukmini.dutt@aimco.com;rajat.biswas@aimco.com;Biplab.Chakraborty@aimco.com"/>
+	<property name="email.cc.list"		value=""/>
+	<property name="email.bcc.list"		value=""/>
+	<property name="email.from"		value="Subversion@aimco.com"/>
+	<property name="smtp.host"		value="smtp.aimco.com"/>
+	<property name="smtp.port"		value="25"/>
+	<property name="ssl"			value="false"/>
+		
+</project>

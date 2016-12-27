@@ -1,0 +1,286 @@
+<project name="devinclude"> 
+	<!-- Common Configuration -->
+	<property name="svn.installed.path"		value="\\grvs37\subversion"/>
+	<property name="verbose" value="true"/>	
+	<property name="backup.dir"		value="..\..\backups"/>
+	<property name="environment.variables" value="AIMCOWeb~D:\AIMCOWEB"/>
+	<property name="root.dir" value="D:"/>
+	<property name="temp.sourcecode.build.output.dir" value="D:\NANT_Temp"/>
+	<property name="service.account.userid" value="AIMCO\_DCOTSQL114"/>
+	<property name="service.account.password" value="4E03021E128550A97E09CDD70BCF4E01"/>
+	<property name="deployment.environment" value="QA"/>
+	<property name="merge.with.branch" value="true"/>
+	<property name="iis.is80"		value="false"/>
+
+	<!-- GAC Configuration -->
+	<property name="gac.repos"		value="http://subversion.aimco.com/svn/WebDev/apps_rationalization/Application/Trunk/Source/GAC"/>	
+	<property name="gac.revision.to"		value="HEAD"/>
+	<property name="gac.deploy.dir"		value="D:\AIMCOWEB\NetDLL" />
+
+	<!-- COM Configuration -->
+	<property name="com.deploy.dir"		value="D:\AIMCOWEB\Components" />
+	<property name="com.admin.ad.projects"	 value="" />
+	<property name="com.admin.userid"	 value="AIMCO\_Intranet" />
+	<property name="com.admin.password"	 value="C5B72AA95AE66E60E02305D5EBDBAA6F" />
+		
+	
+	<!-- Schedule Task Configuration -->
+	<property name="schedule.repos"		value="http://subversion.aimco.com/svn/WebDev/apps_rationalization/Application/Trunk/Source/Executables/AimcoScheduledTasks/AimcoScheduledTasks_Net"/>
+	<property name="schedule.revision.to"		value="HEAD"/>	
+	<property name="schedule.deploy.dir"		value="D:\AIMCOWEB\Apps" />
+	
+	<!-- EXE Configuration -->
+	<property name="exe.repos"		value="http://subversion.aimco.com/svn/WebDev/apps_rationalization/Application/Trunk/Source/Executables/AimcoJobComponents"/>
+	<property name="exe.revision.to"		value="HEAD"/>	
+	<property name="exe.deploy.dir"		value="D:\AimcoWeb\Apps" />
+
+
+	<!-- Config File Configuration -->
+	<property name="config.file.repos"		value="http://subversion.aimco.com/svn/WebDev/apps_rationalization/Application/Trunk/Deployable/DBServerConfiguration File/GRVS48"/>
+	<property name="application.config.dir" value="D:\AIMCOWEB\config"/>
+	<property name="config.revision.to"		value="HEAD"/>
+
+	<!-- SQL File Configuration -->
+	<property name="job.sql.file.repos"		value="http://subversion.aimco.com/svn/WebDev/apps_rationalization/HorizonDBObjects/Trunk/Jobs/Jobs_48"/>
+	<property name="job.sql.connection.string.sub.path"		value="Code_Base"/>
+	<property name="job.sql.connection.string.path"		value="-S DCOTSQL114"/>
+	<property name="job.proxy.sql.connection.string.path"		value="-D msdb -S DCOTSQL114"/>
+	<property name="job.sql.revision.to"		value="HEAD"/> 
+	
+
+	<!-- SSIS Merge Configuration -->
+	<property name="ssis.repos"		value="http://subversion.aimco.com/svn/WebDev/apps_rationalization/HorizonDBObjects/Trunk/SSIS_Packages/SSIS_48"/>	
+	<property name="ssis.revision.to"		value="HEAD"/>
+	<property name="ssis.sql.conn"		value="Provider=SQLOLEDB;Data Source=DCOTSQL114;Initial Catalog=master;Integrated Security=SSPI"/> 
+	<property name="ssis.server.name"		value="DCOTSQL114"/> 
+	<property name="ssis.deploy.proc.name"		value="[Proc_Auto_Deploy]"/>
+	<property name="ssis.sql.create.proc"		value="..\..\NANT v0.92\Thirdparty Tools\SSIS SQL\Create_Proc_Auto_Deploy.sql"/>
+	<property name="ssis.sql.drop.proc"		value="..\..\NANT v0.92\Thirdparty Tools\SSIS SQL\Drop_Proc_Auto_Deploy.sql"/>
+	<property name="ssis.backup.path"		value="..\..\backups"/>
+	
+	<!-- SQL File Configuration -->
+	<property name="sql.file.repos"		value="http://subversion.aimco.com/svn/WebDev/apps_rationalization/HorizonDBObjects/Trunk/Database/Database_48"/>
+	<property name="sql.connection.string"		value="D:\AIMCOWEB\config"/>
+	<property name="sql.connection.string.path"		value="-S DCOTSQL114"/>	
+	<property name="sql.revision.to"		value="HEAD"/>
+	
+	<!-- Parameterized Value SSIS-->
+	<property name="Intranet_Server"  value="DCOTSQL113"/>
+	<property name="SSIS_AffPricing_LogFile_path"  value="D:\AimcoWeb\SSIS\AffordablePricingSync\Logfile.log"/>
+	<property name="Horizon_Decision_Support_Server"  value="DCOTSQL114"/>
+	<property name="Email_Affprop_Error_CC"  value=""/>
+	<property name="Email_Affprop_Lp_Error_TO"  value="Debarati.Bosu@aimco.com"/>
+	<property name="SSIS_Affprop_chkpnt_LogFile_path"  value="D:\SSISLogs\AffordablePropertyChkpnt"/>
+	<property name="Horizon_Processing_Server"  value="DCOTSQL117"/>
+	<property name="SSIS_Affprop_LogFile_path"  value="D:\SSISLogs\AffordableProperty.log"/>
+	<property name="Email_DWload_Error_CC"  value=""/>
+	<property name="Email_DWload_Error_To"  value="Debarati.Bosu@aimco.com"/>
+	<property name="SSIS_DWload_chkpnt_file_path"  value="D:\SSISLogs\DW_Build.CKPT"/>
+	<property name="Horizon_Processing_Server_pwd"  value="datareader"/>
+	<property name="Horizon_Processing_Server_usrname"  value="webreadonly"/>
+	<property name="SSIS_DWload_LogFile_path"  value="D:\SSISLogs\DW_Load.log"/>
+	<property name="SSIS_EmpStgBld_LogFile_path"  value="D:\DTSLogs\Employee_Stage Build.txt"/>
+	<property name="Capex_Source_File_path"  value="\\grvs10\data\Horizon_Test\Horizon_QA\Decision Support\Capex Import for GRVS48\Capex Log.csv"/>
+	<property name="SSIS_IntrntBld_LogFile_path"  value="D:\DTSLogs\Intranet_Build.txt"/>
+	<property name="SSIS_LdStgBld_LogFile_path"  value="D:\DTSLogs\Leads_Stage Build.txt"/>
+	<property name="SSIS_cntct_daily_LogFile_path"  value="D:\AimcoWeb\SSIS\Load_CMS\Logs\Error_Log.txt"/>
+	<property name="Avaya_Informix_Server_Password"  value="Aimco123"/>
+	<property name="Avaya_Informix_Server_Username"  value="cmsodbc1"/>
+	<property name="SSIS_cntct_hourly_LogFile_path"  value="D:\AimcoWeb\SSIS\Load_CMS\Logs\Error_Log - HOURLY.txt"/>
+	<property name="SSIS_cntct_monthly_LogFile_path"  value="D:\AimcoWeb\SSIS\Load_CMS\Logs\Error_Log - MONTHLY.txt"/>
+	<property name="SSIS_cntct_weekly_LogFile_path"  value="D:\AimcoWeb\SSIS\Load_CMS\Logs\Error_Log - WEEKLY.txt"/>
+	<property name="SSIS_OprtnBld_LogFile_path"  value="D:\SSISLogs\operations_build.txt"/>
+	<property name="SSIS_mediatrckng_LogFile_path"  value="D:\SSISLogs\pkgMediaTrackingCopyLUTables.txt"/>
+	<property name="Email_Mediatrckng_To"  value="Debarati.Bosu@aimco.com"/>
+	<property name="Email_MrngPrcsN_To"  value="Debarati.Bosu@aimco.com"/>
+	<property name="MrngPrcsN_AnticipatedCompletionTime"  value="30601"/>
+	<property name="SSIS_Revmngmt_LogFile_path"  value="D:\SSISLogs\pkgRevMgmtDWBuildPostProcessing.txt"/>
+	<property name="SSIS_Whoscalling_LogFile_path"  value="D:\SSISLogs\WhosCalling.txt"/>
+	<property name="Whoscalling_sourceFile_Path"  value="D:\Data\WhosCalling"/>
+	<property name="Avaya_Usr_dfn_dt_daily"  value=""/>
+	<property name="Avaya_Usr_dfn_dt_month_strt"  value=""/>
+	<property name="Avaya_Usr_dfn_dt_weekly_end"  value=""/>
+	<property name="Avaya_Usr_dfn_dt_weekly_strt"  value=""/>
+
+	
+	<!-- Parameterized Value SQL Job-->
+	<property name="Horizon_Decision_Support_Job_Disabled"   value="0"/>
+	<property name="Horizon_Decision_Support_owner_login"   value="sa"/>
+	<property name="Horizon_Decision_Support_Schedule_Enabled"   value="1"/>
+	<property name="Horizon_Decision_Support_email_operator_HorSpprt"   value="Horizon Support"/>
+	<property name="Horizon_Decision_Support_page_operator_Analytics"   value="Analytics"/>
+	<property name="Capex_output_file_name"   value="D:\SSISLogs\Capex Log Import.txt"/>
+	<property name="Horizon_Decision_Support_email_operator_Analytcs"   value="Analytics"/>
+	<property name="Data_Archive_job_Email"   value="Debarati.Bosu@aimco.com"/>
+	<property name="DW_Build_output_file_name1"   value="D:\SSIS JOB OUT PUT Files\DWBUILD STEP1"/>
+	<property name="DW_Build_output_file_name2"   value="D:\SSIS JOB OUT PUT Files\DWBUILD STEP2"/>
+	<property name="DW_Build_output_file_name3"   value="D:\SSIS JOB OUT PUT Files\DWBUILD STEP3"/>
+	<property name="DW_Build_output_file_name4"   value="D:\SSIS JOB OUT PUT Files\DWBUILD STEP4"/>
+	<property name="eCustomer800Number_exe_path"   value="D:\AimcoWeb\Apps\eCustomer800Number\eCustomer800Number.exe"/>
+	<property name="Horizon_Decision_Support_Employee_Stage.mdf"   value="G:\SQLData\Employee_Stage.mdf"/>
+	<property name="Horizon_Decision_Support_Employee_Stage_log.ldf"   value="L:\SQLLog\Employee_Stage_log.ldf"/>
+	<property name="Employee_Build_output_file_name1"   value="D:\TSQLLogs\DW Build - Create StageDatabase.txt"/>
+	<property name="Employee_Build_cmd_path"   value="G:\GRVS48_cmd\Employee.cmd"/>
+	<property name="Horizon_Decision_Support_Employee.mdf"   value="G:\SQLData\Employee.mdf"/>
+	<property name="Horizon_Decision_Support_loginame"   value="sa"/>
+	<property name="Horizon_Decision_Support_page_operator_HorSpprt"   value="Horizon Support"/>
+	<property name="Hor_ProcessingServer_LinkedServer1"   value="HorizonProcessingServer"/>
+	<property name="Hor_ProcessingServer_LinkedServer2"   value="HorizonProcessingServer"/>
+	<property name="etlMarts_output_file_name1"   value="D:\SSISLogs\etlMarts.log"/>
+	<property name="etlMarts_output_file_name2"   value="D:\SSIS JOB OUT PUT Files\ETLMARTS STEP4"/>
+	<property name="etlMarts_output_file_name3"   value="D:\SSIS JOB OUT PUT Files\ETLMARTS STEP6"/>
+	<property name="etlMarts_output_file_name4"   value="D:\SSIS JOB OUT PUT Files\ETLMARTS STEP7"/>
+	<property name="etlMarts_Email"   value="Debarati.Bosu@aimco.com"/>
+	<property name="Horizon_Decision_Support_Proxy_name"   value="Proxy_DCOTSQL114"/>
+	<property name="ImportStage_Restore_bak_path"   value="D:\ImportStage_Restore\ImportStage.bak"/>
+	<property name="Horizon_Decision_Support_Leads_Stage.mdf"   value="G:\SQLData\Leads_Stage.mdf"/>
+	<property name="Horizon_Decision_Support_Leads_Stage_log.ldf"   value="L:\SQLLog\Leads_Stage_log.ldf"/>
+	<property name="Leads_Build_output_file_name1"   value="D:\TSQLLogs\DW Build - Create StageDatabase.txt"/>
+	<property name="Leads_Build_output_file_name2"   value="D:\TSQLLogs\DW Build - run dts package.txt"/>
+	<property name="Leads_Build_cmd_path"   value="G:\GRVS48_cmd\Leads.cmd"/>
+	<property name="Horizon_Decision_Support_Leads.mdf"   value="G:\SQLData\Leads.mdf"/>
+	<property name="Leads_Build_output_file_name3"   value="D:\TSQLLogs\DW Build - run revmngt process.txt"/>
+	<property name="Horizon_Decision_Support_Operations_Stage.mdf"   value="G:\SQLData\Operations_Stage.mdf"/>
+	<property name="Horizon_Decision_Support_Operations_Stage_log.ldf"   value="L:\SQLLog\Operations_Stage_log.ldf"/>
+	<property name="Operations_Build_output_file_name1"   value="D:\TSQLLogs\DW Build - Create StageDatabase.txt"/>
+	<property name="Operations_cmd_path"   value="G:\GRVS48_cmd\Operations.cmd"/>
+	<property name="Horizon_Decision_Support_Operations.mdf"   value="G:\SQLData\Operations.mdf"/>
+	<property name="Horizon_Decision_Support_login_name"   value="sa"/>
+	<property name="Pricing_cmd_path_1"   value="D:\Pricing_feed\Pricing.cmd"/>
+	<property name="Pricing_Restore_output_file_name1"   value="D:\Pricing_feed\Pricing.log"/>
+	<property name="PricingBackup_bak_path_1"   value="D:\Pricing_feed\PricingBackup.bak"/>
+	<property name="Horizon_Decision_Support_Pricing_Data.mdf1"   value="G:\SQLData\Pricing_Data.mdf"/>
+	<property name="Horizon_Decision_Support_Pricing_Log.ldf1"   value="L:\SQLLog\Pricing_Log.ldf"/>
+	<property name="Pricing_cmd_path_2"   value="D:\Pricing_Feed\Pricing.cmd"/>
+	<property name="Pricing_Restore_output_file_name2"   value="D:\Pricing_feed\Pricing.log"/>
+	<property name="PricingBackup_bak_path_2"   value="D:\Pricing_feed\PricingBackup.bak"/>
+	<property name="Horizon_Decision_Support_Pricing_Data.mdf2"   value="G:\SQLData\Pricing_Data.mdf"/>
+	<property name="Horizon_Decision_Support_Pricing_Log.ldf2"   value="L:\SQLLog\Pricing_Log.ldf"/>
+	<property name="Horizon_Decision_Support_BAKPATH_RealPage_UDS"   value="D:\data\RealPage_UDS\UDS"/>
+	<property name="Horizon_Decision_Support_Data_RealPage_UDS"   value="G:\SQLData"/>
+	<property name="Horizon_Decision_Support_Log_RealPage_UDS"   value="L:\SQLLog"/>
+	<property name="UDS_Database_file_name"   value="U1188988"/>
+	<property name="RealPage_Restore_output_file_name1"   value="D:\tsqllogs\Restore RealPage_UDS database.txt"/>
+	<property name="RealPage_Restore_output_file_name2"   value="D:\tsqllogs\RebuildIndexes_RealPage_UDS"/>
+	<property name="Jboss_username"   value="AIMCO\ZZ1JBOSS"/>
+	<property name="Horizon_Decision_Support_account_name"   value="[AIMCO\_DCOTSQL114]"/>
+	<property name="WhosCalling_exe_path_1"   value="D:\aimcoweb\apps\FileMover\FileMover.exe ftpWhosCalling"/>
+	<property name="WhosCalling_exe_path_2"   value="D:\aimcoweb\apps\FileMover\FileMover.exe WhosCalling"/>
+	<property name="RealPageUDSImport_cmd_path"   value="D:\AimcoWeb\Apps\RealPage_UDS_Import\RealPage_UDS_Import.exe"/>
+	
+	<!-- Parameterized Values of Application -->
+	<property name="AFRReportsToVistaImport_host"  value="GRVS110"/>
+	<property name="DispositionPDFMirror_Intranet_Content_REM_Mirrors_From"  value="D:\Data\DispositionPDFs"/>
+	<property name="DispositionPDFMirror_Intranet_Content_REM_Mirrors_To"  value="\\GRVS133\Intranet_Content\Dispositions\DispositionPDFs"/>
+	<property name="DispositionPDFMirror_robocopy_Intranet_Content_From"  value="\\GRVS12\Data\DispositionPDFs_QA"/>
+	<property name="DispositionPDFMirror_robocopy_Intranet_Content_To"  value="\\DCOTIIS033\Intranet_Content\Dispositions\DispositionPDFs"/>
+	<property name="DispositionPDFMirror_Web_Content_REM_Mirrors_To"  value="\\GRVS134\Web_Content\Dispositions\DispositionPDFs"/>
+	<property name="DispositionPDFMirror_robocopy_Web_Content_From"  value="\\GRVS12\Data\DispositionPDFs_DEV"/>
+	<property name="DispositionPDFMirror_robocopy_Web_Content_To"  value="\\DCOTIIS033\Web_Content\Dispositions\DispositionPDFs"/>
+	<property name="OldEmailDelete_Computer_Name"  value="DCOTAPP032"/>
+	<property name="OldEmailDelete_Mail_To"  value="kamalesh.gupta@aimco.com;debarati.bosu@aimco.com "/>
+	<property name="OldEmailDeletion_NotifyEmail"  value="kamalesh.gupta@aimco.com;debarati.bosu@aimco.com "/>
+	<property name="OldEmailDeletion_MailboxName"  value="Inquiries.Test@aimco.com"/>
+	<property name="OldEmailDeletion_MailboxEmail"  value="InquiriesStage@aimco.com"/>
+	<property name="OldEmailDeletion_BCCEmailUser"  value="apartmentliving@aimco.com"/>
+	<property name="FocusService_NotifyEmail"  value="kamalesh.gupta@aimco.com;debarati.bosu@aimco.com "/>
+	<property name="ImageUploadAlert_UploadServerPath"  value="\\DCOTIIS033\web_content\aptimages\awaitingapproval\"/>
+	<property name="ImageUploadAlert_UploadHTTPPath"  value="http://stageww22015.aimco.com/aptimages/awaitingapproval/"/>
+	<property name="ImageUploadAlert_ApprovedServerPath"  value="\\DCOTIIS033\web_content\aptimages\"/>
+	<property name="ImageUploadAlert_ApprovedHTTPPath"  value="http://stageww22015.aimco.com/aptimages/"/>
+	<property name="ImageUploadAlert_ApprovedAppPath"  value="http://stageintranet2015.aimco.com/propertyadmin/imageupload/"/>
+	<property name="NSFX_Email"  value="kamalesh.gupta@aimco.com"/>
+	<property name="NSFX_NSFDataFolder"  value="%AIMCOWEB%\Apps\NSFX\NSFData"/>
+	<property name="NSFX_7Zip"  value="c:\Program Files\7-Zip\7za.exe"/>
+	<property name="purgeoldlogfiles_Folder_path"  value="\\DCOTIIS033\e$\Program Files\Webtrends\SmartSource Data Collector\weblogs"/>
+	<property name="RealPage_SDE_Import_RootDirectory"  value="\\grvs12\data\RealPage\Web\Stage\"/>
+	<property name="RealPage_SDE_Import_PeoplesoftFTPSite"  value="dcodps111.aimco.com"/>
+	<property name="RealPage_SDE_Import_PeoplesoftDefaultPath"  value="/tstpsbat/fs91tstb/fs91tst/aimco/ptmp/"/>
+	<property name="RealPage_SDE_Import_VistaPrinterName"  value="vista_qa"/>
+	<property name="RealPage_SDE_Import_ClientSettingsProvider"  value=""/>
+	<property name="RealPage_SDE_Import_FTP_Integration_FileMover_SFTPGet_UserID"  value="aimcoqa"/>
+	<property name="RealPage_SDE_Import_FTP_Integration_FileMover_SFTPGet_Pwd"  value="qu@l1ty"/>
+	<property name="RealPage_SDE_Import_FTP_Integration_FileMover_Dest"  value="\\grvs12\data\RealPage\Web\Stage\SDE\Download\New"/>
+	<property name="RealPage_SDE_Import_FTP_Integration_FileMover_Dest_1"  value="\\grvs12\data\RealPage\Web\Stage\SDE\Download\SDELogs"/>
+	<property name="RealPage_SDE_Import_FTP_Integration_FileMover_EmailOnError"  value="kamalesh.gupta@aimco.com;debarati.bosu@aimco.com "/>
+	<property name="RealPage_SDE_Import_FTP_Integration_RunSDE"  value="\\grvs12\data\RealPage\Web\Stage\SDE\Download\New"/>
+	<property name="StockFetch_DestFolder"  value="\\DCOTIIS033\E$\Inetpub\intranet.Aimco.com\Inc\content"/>
+	<property name="StockFetch_NotifyEmail"  value="kamalesh.gupta@aimco.com;debarati.bosu@aimco.com "/>
+	
+	<property name="Intranet_DB_UnitAvailability_Host_NotifyEmail"  value="Debarati.Bosu@aimco.com"/>
+	<property name="Intranet_DB_UnitAvailability_Export_ErrorEmail"  value="Debarati.Bosu@aimco.com"/>
+	<property name="Intranet_DB_UnitAvailability_Servicehost_NotifyEmail"  value="Debarati.Bosu@aimco.com"/>
+	<property name="Intranet_DB_UnitAvailability_Servicehost_baseAddresses"  value="http://localhost:8015/UnitAvailability"/>
+
+	<property name="Decision_Support_eCustomer800Number_DataSource"  value="DCOTSQL114"/>
+	<property name="Decision_Support_eCustomer800Number_WebServiceURL"  value="http://DCOTESB156:8380/RealpageServices/ebws/Webservice/CommonWebservice"/>
+	<property name="RealPage_UDS_Import_RealPageRootDirectory"  value="d:\data\RealPage_UDS\"/>
+	<property name="RealPage_UDS_Import_RealPageUDSFTPSite"  value="uds.realpage.com"/>
+	<property name="RealPage_UDS_Import_RealPageUDSFTPUserName"  value="1188988"/>
+	<property name="RealPage_UDS_Import_RealPageEncryptedPassword"  value="EAAAAHsXipRyduAMqePylSUJk8LuYNMZRCXoyEeRUJUxn2Rj"/>
+	<property name="Decision_Support_Pricing_Feed_Copy"  value="\\grvs12\Data\Horizon_Test\Horizon_QA\PricingDBBackup\PricingBackup.bak.gz"/>
+	
+	<property name="Sandbox_CRGenerator_DestPath"   value="\\DCOTIIS033\Content\reports\reportfiles\crystal"/>
+	<property name="Sandbox_EnvironmentalReports_EnvRptsDir"   value="\\grvs10\data\Horizon_Test\Horizon_QA\horizon\EnvironmentalReports"/>
+	<property name="Sandbox_EnvironmentalReports_EmailFrom"   value="EnvRpts@aimco.com"/>
+	<property name="Sandbox_EnvironmentalReports_EmailOnJobSuccess"   value="Debarati.Bosu@aimco.com"/>
+	<property name="Sandbox_EnvironmentalReports_EmailOnJobFailure"   value="Debarati.Bosu@aimco.com"/>
+	<property name="Sandbox_EnvironmentalReportsFTP.ps1_SQLserver"   value="DCOTSQL117"/>
+	<property name="Sandbox_MaintSurveyImport_ErrorEmail"   value="Debarati.Bosu@aimco.com"/>
+	<property name="Sandbox_MaintSurveyImport_LogDir"   value="D:\data_import\MaintSurvey\log"/>
+	<property name="Sandbox_NYPropertyResidentStatement_EmailOnJobSuccess"   value="Debarati.Bosu@aimco.com"/>
+	<property name="Sandbox_NYPropertyResidentStatement_EmailOnJobFailure"   value="Debarati.Bosu@aimco.com"/>
+	<property name="Sandbox_PA_File_Handler_LogDir"   value="D:\data_import\PA\Log\"/>
+	<property name="Sandbox_mirror_env_rpts_sourcepath"   value="\\grvs10\data\Horizon_Test\Horizon_QA\horizon\EnvironmentalReports"/>
+	<property name="Sandbox_mirror_env_rpts_destinationpath"   value="\\DCOTIIS033\Content\Environmental_Reports"/>
+	<property name="Sandbox_mirror_env_rpts_logpath"   value="D:\TSQLLogs\Copy Environmental Reports - Step 1.txt"/>
+	<property name="Sandbox_FTPDownload_userid"   value="1188988"/>
+	<property name="Sandbox_FTPDownload_password"   value="EAAAAHsXipRyduAMqePylSUJk8LuYNMZRCXoyEeRUJUxn2Rj"/>
+	<property name="Sandbox_FTPDownload_fullbackupcheckday"   value="0"/>
+	<property name="Sandbox_FTPDownload_filenamepattern"   value="U1188988_"/>
+	<property name="Sandbox_FTPFullBackupCheckerAndRename_userid"   value="1188988"/>
+	<property name="Sandbox_FTPFullBackupCheckerAndRename_password"   value="EAAAAHsXipRyduAMqePylSUJk8LuYNMZRCXoyEeRUJUxn2Rj"/>
+	<property name="Sandbox_FTPFullBackupCheckerAndRename_fullbackupcheckday"   value="0"/>
+	<property name="Sandbox_FTPFullBackupCheckerAndRename_filenamepattern"   value="U1188988_"/>
+	<property name="Sandbox_FTPMailSend_userid"   value="1188988"/>
+	<property name="Sandbox_FTPMailSend_password"   value="EAAAAHsXipRyduAMqePylSUJk8LuYNMZRCXoyEeRUJUxn2Rj"/>
+	<property name="Sandbox_FTPMailSend_recipients"   value="Debarati.Bosu@aimco.com"/>
+	<property name="Sandbox_FTPMailSend_filenamepattern"   value="Incr_U1188988_"/>
+	<property name="Sandbox_UDSRemoveOldPart_userid"   value="1188988"/>
+	<property name="Sandbox_UDSRemoveOldPart_password"   value="EAAAAHsXipRyduAMqePylSUJk8LuYNMZRCXoyEeRUJUxn2Rj"/>
+	<property name="Sandbox_UDSRemoveOldPart_fullbackupcheckday"   value="0"/>
+	<property name="Sandbox_UDSRemoveOldPart_filenamepattern"   value="old_U1188988_"/>
+	<property name="Sandbox_RealPage_UDS_UDS_movefile_del_path"   value="\\grvs12\data\Horizon_Test\Horizon_Dev\RealPage\Web\Prod\UDS\*.bak"/>
+	<property name="Sandbox_RealPage_UDS_UDS_movefile_copy_path"   value="\\grvs12\data\Horizon_Test\Horizon_Dev\RealPage\Web\Prod\UDS\*.bak"/>
+	<property name="Sandbox_PricingXML_EmailOnJobSuccess"   value="Debarati.Bosu@aimco.com"/>
+	<property name="Sandbox_PricingXML_EmailOnJobFailure"   value="Debarati.Bosu@aimco.com"/>
+	<property name="Sandbox_PricingXML_EmailOnRecommendationsNeeded"   value="Debarati.Bosu@aimco.com"/>
+	<property name="Sandbox_PricingXML_EmailOnRecommendationsLoadStatus"   value="Debarati.Bosu@aimco.com"/>
+	<property name="Sandbox_PricingXML_EmailOnPROFITNewLeaseLoadStatus"   value="Debarati.Bosu@aimco.com"/>
+	<property name="Sandbox_PricingXML_EmailOnPROFITAmenityLoadStatus"   value="Debarati.Bosu@aimco.com"/>
+	<property name="Sandbox_PricingXML_UnitPricingUploadExceptionReportURL"   value="http://DCOTSQL117/ReportServer?%2fDevelopment%2fPricing%2fUnit+Pricing+Upload+Exceptions"/>
+	<property name="Sandbox_PricingXML_UnitPricingNotificationReportURL"   value="http://DCOTSQL117/ReportServer?%2fDevelopment%2fPricing%2fUnit+Pricing+Notification"/>
+	<property name="Sandbox_PricingXML_RenewalPricingUploadExceptionReportURL"   value="http://DCOTSQL117/ReportServer?%2fDevelopment%2fPricing%2fRenewal+Pricing+Upload+Exceptions"/>
+	<property name="Sandbox_PricingXML_ExportedAutomatedRenewalLettersReportURL"   value="http://DCOTSQL117/ReportServer"/>
+	<property name="Sandbox_PricingXML_PricingWebsiteURL"   value="http://stagehorizon2015.aimco.com/Pricing/Pricing.aspx"/>
+	<property name="Sandbox_PricingXML_TestingMode"   value="TRUE"/>
+	<property name="Sandbox_PricingXML_DebugMode"   value="TRUE"/>
+	<property name="Sandbox_PricingXML_EmailRenewalLettersToAddress"   value="Debarati.Bosu@aimco.com"/>
+	<property name="Sandbox_PricingXML_ARLOutputPath"   value="D:\data_export\RenewalLetters"/>
+	<property name="Sandbox_PricingXML_FTPUserName"   value="gaw/aimco"/>
+	<property name="Sandbox_PricingXML_FTPPassword"   value="aipw*89"/>
+	<property name="Sandbox_PricingXML_YSDataIssuesEmailTo"   value="Debarati.Bosu@aimco.com"/>
+	<property name="Sandbox_PricingXML_ProsKeyFile"   value="D:\AIMCOWeb\Apps\PricingXML\ppss-dev.pbk"/>
+	<property name="Sandbox_PricingXML_ProsURL"   value="http://lppsdev:8080/axis2/services/SystemService"/>
+
+	<!-- Mail Notification Configuration -->
+	<property name="mail.send.required"	value="true"/>	
+	<property name="email.to.list"		value="pinaki.ghosh@aimco.com;sam.elliott@aimco.com;rukmini.dutt@aimco.com;rajat.biswas@aimco.com;Biplab.Chakraborty@aimco.com"/>
+	<property name="email.cc.list"		value=""/>
+	<property name="email.bcc.list"		value=""/>
+	<property name="email.from"		value="Subversion@aimco.com"/>
+	<property name="smtp.host"		value="smtp.aimco.com"/>
+	<property name="smtp.port"		value="25"/>
+	<property name="ssl"			value="false"/>
+		
+</project>

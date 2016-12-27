@@ -1,0 +1,52 @@
+<project name="mergeinclude">
+	<!-- JOB SQL Merge Configuration -->
+	<property name="job.sql.merge.with.branch" value="false"/> 
+	<property name="job.sql.merge.branch.repos"		value="http://subversion.aimco.com/svn/WebDev/apps_rationalization/IntranetDBObjects/Trunk/Jobs"/>
+	<property name="job.sql.merge.branch.revision.from"		value="22123"/>
+	<property name="job.sql.merge.branch.revision.to"		value="HEAD"/>
+	<property name="job.sql.specific.project"		value=""/>
+	
+	<!-- GAC Merge Configuration -->
+	<property name="gac.merge.with.branch" value="false"/> 
+	<property name="gac.merge.branch.repos"		value="http://subversion.aimco.com/svn/WebDev/apps_rationalization/Application/Trunk/Source/GAC"/>	
+	<property name="gac.merge.branch.revision.from"		value="22213"/>
+	<property name="gac.merge.branch.revision.to"		value="HEAD"/>
+	<property name="gac.specific.project"			value="DoubleHop,Net_Customer,Net_Data,Net_Encrypt,Net_Error,Net_Mail,Net_Property,StringFunctions,XMLEdit"/>
+
+	<!-- COM  Merge Configuration -->
+	<property name="com.merge.with.branch" 			value="false"/> 
+	<property name="com.merge.branch.repos"		value="http://subversion.aimco.com/svn/WebDev/apps_rationalization/Application/Trunk/Deployable/DLLs/COM"/>	
+	<property name="com.merge.branch.revision.from"		value="22213"/>
+	<property name="com.merge.branch.revision.to"		value="HEAD"/>
+	<property name="com.specific.project"			value="COM_ENCRYPT,COM_LIB,MTS_DATA,MTS_LIB,MTS_ERROR,AIMCO-NET_MAIL INTEROP"/>
+	
+	<!-- EXE Merge Configuration -->
+	<property name="exe.merge.with.branch" value="false"/>
+	<property name="exe.merge.branch.repos"		value="http://subversion.aimco.com/svn/WebDev/apps_rationalization/Application/Trunk/Source/Executables/AimcoJobComponents"/>
+	<property name="exe.merge.branch.revision.from"		value="22213"/>
+	<property name="exe.merge.branch.revision.to"		value="HEAD"/>
+	<property name="exe.specific.project"			value="FileMover,Convert_UTF,UnitAvailabilityExport,Client,SelfHost,UnitAvailabilityServiceHost"/>
+	
+		
+	<!-- SSIS Merge Configuration -->
+	<property name="ssis.merge.with.branch" value="false"/>
+	<property name="ssis.merge.branch.repos"		value="http://subversion.aimco.com/svn/WebDev/apps_rationalization/IntranetDBObjects/Trunk/SSIS packages/SSIS_35"/>
+	<property name="ssis.merge.branch.revision.from"		value="22123"/>
+	<property name="ssis.merge.branch.revision.to"		value="HEAD"/>
+	<property name="ssis.specific.project"	value=""/>
+	
+
+	<!-- Config Merge Configuration -->
+	<property name="config.merge.with.branch" value="false"/>
+	<property name="config.merge.branch.repos"		value="http://subversion.aimco.com/svn/WebDev/apps_rationalization/Application/Trunk/Deployable/DBServerConfiguration File/GRVS35"/>
+	<property name="config.merge.branch.revision.from"		value="22213"/>
+	<property name="config.merge.branch.revision.to"		value="HEAD"/>
+
+
+	<!-- SQL Merge Configuration -->
+	<property name="sql.merge.with.branch" value="false"/>
+	<property name="sql.merge.branch.repos"		value="http://subversion.aimco.com/svn/WebDev/apps_rationalization/IntranetDBObjects/Trunk/Database/Database_35"/>
+	<property name="sql.merge.branch.revision.from"		value="22123"/>
+	<property name="sql.merge.branch.revision.to"		value="HEAD"/>
+	<property name="sql.specific.project"			value=""/>
+</project>

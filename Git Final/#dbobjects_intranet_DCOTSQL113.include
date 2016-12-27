@@ -1,0 +1,258 @@
+<project name="devinclude"> 
+	<!-- Common Configuration -->
+	<property name="svn.installed.path"		value="\\grvs37\subversion"/>
+	<property name="verbose" value="true"/>	
+	<property name="backup.dir"		value="..\..\backups"/>
+	<property name="environment.variables" value="AIMCOWeb~D:\AIMCOWEB"/>
+	<property name="root.dir" value="D:"/>
+	<property name="temp.sourcecode.build.output.dir" value="D:\NANT_Temp"/>
+	<property name="service.account.userid" value="AIMCO\_DCOTSQL113"/>
+	<property name="service.account.password" value="CE4CB8F36D75564CEB237FF917DCCAE8"/>
+	<property name="deployment.environment" value="QA"/>
+	<property name="merge.with.branch" value="true"/>
+	<property name="iis.is80"		value="false"/>
+
+	<!-- GAC Configuration -->
+	<property name="gac.repos"		value="http://subversion.aimco.com/svn/WebDev/apps_rationalization/Application/Trunk/Source/GAC"/>	
+	<property name="gac.revision.to"		value="HEAD"/>
+	<property name="gac.deploy.dir"		value="D:\AIMCOWEB\NetDLL" />
+		
+	<!-- COM Configuration -->
+	<property name="com.repos"		value="http://subversion.aimco.com/svn/WebDev/apps_rationalization/Application/Trunk/Deployable/DLLs/COM"/>
+	<property name="com.revision.to"		value="HEAD"/>	
+	<property name="com.deploy.dir"		value="D:\AIMCOWEB\Components" />
+	<property name="com.admin.ad.projects"	 value="" />
+	<property name="com.admin.userid"	 value="AIMCO\_Intranet" />
+	<property name="com.admin.password"	 value="C5B72AA95AE66E60E02305D5EBDBAA6F" />
+	
+	<!-- EXE Configuration -->  
+	<property name="exe.repos"		value="http://subversion.aimco.com/svn/WebDev/apps_rationalization/Application/Trunk/Source/Executables/AimcoJobComponents"/>
+	<property name="exe.revision.to"		value="HEAD"/>	
+	<property name="exe.deploy.dir"		value="D:\AimcoWeb\Apps" />
+	
+	<!-- SQL File Configuration --> 
+	<property name="job.sql.file.repos"		value="http://subversion.aimco.com/svn/WebDev/apps_rationalization/IntranetDBObjects/Trunk/Jobs"/>
+	<property name="job.sql.connection.string.sub.path"		value="Code_Base"/>
+	<property name="job.sql.connection.string.path"		value="-S DCOTSQL113"/>
+	<property name="job.proxy.sql.connection.string.path"		value="-D msdb -S DCOTSQL113"/>
+	<property name="job.sql.revision.to"		value="HEAD"/>
+	
+	<!-- Config File Configuration --> 
+	<property name="config.file.repos"		value="http://subversion.aimco.com/svn/WebDev/apps_rationalization/Application/Trunk/Deployable/DBServerConfiguration File/GRVS35"/>
+	<property name="application.config.dir" value="D:\AIMCOWEB\config"/>
+	<property name="config.revision.to"		value="HEAD"/>
+
+	<!-- SSIS Merge Configuration --> 
+	<property name="ssis.repos"		value="http://subversion.aimco.com/svn/WebDev/apps_rationalization/IntranetDBObjects/Trunk/SSIS packages/SSIS_35"/>	
+	<property name="ssis.revision.to"		value="HEAD"/>
+	<property name="ssis.sql.conn"		value="Provider=SQLOLEDB;Data Source=DCOTSQL113;Initial Catalog=master;Integrated Security=SSPI"/> 
+	<property name="ssis.server.name"		value="DCOTSQL113"/> 
+	<property name="ssis.deploy.proc.name"		value="[dbo].[Proc_Auto_Deploy]"/>
+	<property name="ssis.sql.create.proc"		value="..\..\NANT v0.92\Thirdparty Tools\SSIS SQL\Create_Proc_Auto_Deploy.sql"/>
+	<property name="ssis.sql.drop.proc"		value="..\..\NANT v0.92\Thirdparty Tools\SSIS SQL\Drop_Proc_Auto_Deploy.sql"/>
+	<property name="ssis.backup.path"		value="..\..\backups"/>
+	
+	<!-- SQL File Configuration --> 
+	<property name="sql.file.repos"		value="http://subversion.aimco.com/svn/WebDev/apps_rationalization/IntranetDBObjects/Trunk/Database/Database_35"/>
+	<property name="sql.connection.string"		value="D:\AIMCOWEB\config"/>
+	<property name="sql.connection.string.path"		value="-S DCOTSQL113"/>	
+	<property name="sql.revision.to"		value="HEAD"/>
+	
+	<!-- Parameterized Value SSIS-->
+	<property name="Intranet_Server"   value="DCOTSQL113"/>
+	<property name="Peoplesoft_emailaddr_password"   value="Welc0m3Tst"/>
+	<property name="Peoplesoft_emailaddr_Servername"   value="FS91TST.WORLD"/>
+	<property name="Peoplesoft_emailaddr_username"   value="Intranet"/>
+	<property name="Emp_emails_file_path"   value="d:\job\EmployeeEmails.csv"/>
+	<property name="Emp_logon_file_path"   value="\\dens03\Intranet_test\Intranet_QA\Departments\Shared\Large-File-Transfer-Area\Jeff Anderson\Employees.txt"/>
+	<property name="Exchange_groups_file_path"   value="D:\JOB\ExchangeGroups.csv"/>
+	<property name="Horizon_Processing_server_password"   value="datareader"/>
+	<property name="Horizon_Processing_server"   value="DCOTSQL117"/>
+	<property name="Horizon_Processing_server_username"   value="webreadonly"/>
+	<property name="Intranet_Databasename"   value="Intranet"/>
+	<property name="SSIS_Hor_integration_logfile_path"   value="D:\SSIS_Log\Horizon_to_Integration_Data_Import.txt"/>
+	<property name="MAP_csv_file_path"   value="D:\JOB\map_car.csv"/>
+	<property name="Oracle_data_import_file_path_1"   value="\\grvs12\data\Intranet_test\Intranet_QA\a1hcm\dev\outbound\webapps\A1_WEBAPPS_TRANS_OB.txt"/>
+	<property name="Oracle_data_import_file_path_2"   value="\\grvs12\data\Intranet_test\Intranet_QA\a1hcm\dev\outbound\webapps\A1_WEBAPPS_DEPT_OB.txt"/>
+	<property name="Oracle_data_import_file_path_3"   value="\\grvs12\data\Intranet_test\Intranet_QA\a1hcm\dev\outbound\webapps\A1_WEBAPPS_BEN_OB.txt"/>
+	<property name="Oracle_data_import_file_path_4"   value="\\grvs12\data\Intranet_test\Intranet_QA\a1hcm\dev\outbound\webapps\A1_WEBAPPS_EMP_OB.txt"/>
+	<property name="HCM_password"   value="a1_intranet"/>
+	<property name="HCM_servername"   value="HCMTST.WORLD"/>
+	<property name="HCM_username"   value="a1_intranet"/>
+	<property name="Oracle_HRMS_file_path"   value="\\grvs12\data\Intranet_test\Intranet_QA\a1hcm\dev\outbound\webapps\A1_HR_USER_LIST.txt"/>
+	<property name="Service_now_file_path"   value="D:\AIMCOWEB\Apps\Service_Now\Data\service_now_data.csv"/>
+	<property name="SSIS_copy_logo_dest_file_path"  value="\\DCOTIIS033\PropertyLogo\"/>
+	<property name="SSIS_copy_logo_source_file_path"   value="\\DCOCFIL073\NewMarketing\Marketing\Email Marketing\Content\Property Logos\Kingsley"/>
+	<property name="SSIS_copy_logo_logfile_path"   value="D:\GRVS122\SSISLogs\SSIS_Copy_Property_Logo.txt"/>
+	<property name="SSIS_copy_logo_source_image_url"   value="http://stageww2.aimco.com/images/propertylogo/"/>
+	<property name="Intranet_Server_appname"   value="DCOTSQL113/SSIS"/>
+	<property name="SSIS_dispro_add_email_attachment"   value="\\grvs12\data\Intranet_test\Intranet_QA\DispoPropReports\PropsAdded.txt"/>
+	<property name="SSIS_dispro_add_email_cc"   value="Debarati.Bosu@aimco.com"/>
+	<property name="SSIS_dispro_add_email_to"   value="Debarati.Bosu@aimco.com"/>
+	<property name="SSIS_dispro_add_email_usrname"   value="_DCOTSQL113"/>
+	<property name="SSIS_dispro_add_filepath"   value="\\grvs12\Data\Intranet_test\Intranet_QA\DispoPropReports\PropsAdded.txt"/>
+	<property name="SSIS_dispro_all_email_attachment"   value="\\grvs12\Data\Intranet_test\Intranet_QA\DispoPropReports\PropsAll.txt"/>
+	<property name="SSIS_dispro_all_email_cc"   value="Debarati.Bosu@aimco.com"/>
+	<property name="SSIS_dispro_all_email_to"   value="Debarati.Bosu@aimco.com"/>
+	<property name="SSIS_dispro_all_email_usrname"   value="_DCOTSQL113"/>
+	<property name="SSIS_dispro_all_filepath"   value="\\grvs12\Data\Intranet_test\Intranet_QA\DispoPropReports\PropsAll.txt"/>
+	<property name="SSIS_dispro_currnt_email_attachment"   value="\\grvs12\data\Intranet_test\Intranet_QA\DispoPropReports\PropsCurrent.txt"/>
+	<property name="SSIS_dispro_currnt_email_cc"   value="Debarati.Bosu@aimco.com"/>
+	<property name="SSIS_dispro_currnt_email_to"   value="Debarati.Bosu@aimco.com"/>
+	<property name="SSIS_dispro_currnt_email_usrname"   value="_DCOTSQL113"/>
+	<property name="SSIS_dispro_currnt_filepath"   value="\\grvs12\data\Intranet_test\Intranet_QA\DispoPropReports\PropsCurrent.txt"/>
+	<property name="SSIS_dispro_dropped_email_attachment"   value="\\grvs12\Data\Intranet_test\Intranet_QA\DispoPropReports\PropsDropped.txt"/>
+	<property name="SSIS_dispro_dropped_email_cc"   value="Debarati.Bosu@aimco.com"/>
+	<property name="SSIS_dispro_dropped_email_to"   value="Debarati.Bosu@aimco.com"/>
+	<property name="SSIS_dispro_dropped_email_usrname"   value="_DCOTSQL113"/>
+	<property name="SSIS_dispro_dropped_filepath"   value="\\grvs12\Data\Intranet_test\Intranet_QA\DispoPropReports\PropsDropped.txt"/>
+	<property name="SSIS_dispro_focus_filepath"   value="\\grvs12\Data\Intranet_test\Intranet_QA\DispoPropReports\PropsFocus.txt"/>
+	<property name="SSIS_dispro_disproRR_filepath"   value="\\grvs12\Data\Intranet_test\Intranet_QA\DispoPropReports\PropsRR.txt"/>
+	<property name="SSIS_dispro_toadd_email_attachment"   value="\\grvs12\data\Intranet_test\Intranet_QA\DispoPropReports\PropsToAdd.txt"/>
+	<property name="SSIS_dispro_toadd_email_cc"   value="Debarati.Bosu@aimco.com"/>
+	<property name="SSIS_dispro_toadd_email_to"   value="Debarati.Bosu@aimco.com"/>
+	<property name="SSIS_dispro_toadd_email_usrname"   value="_DCOTSQL113"/>
+	<property name="SSIS_dispro_toadd_filepath"   value="\\grvs12\data\Intranet_test\Intranet_QA\DispoPropReports\PropsToAdd.txt"/>
+	<property name="SSIS_envpts_sm_file_path"   value="D:\EnvRpts\EnvRpts.xls"/>
+	<property name="SSIS_envpts_email_cc"   value="Debarati.Bosu@aimco.com"/>
+	<property name="SSIS_envpts_email_to"   value="Debarati.Bosu@aimco.com"/>
+	<property name="SSIS_envpts_email_usrname"   value="_DCOTSQL113"/>
+	<property name="SSIS_SMInspectionHorizon_file_path"   value="\\grvs12\Data\Intranet_test\Intranet_QA\Horizon-ProductQuality\SMInspectionsExtract.csv"/>
+	<property name="SSIS_InternetProperty_file_path"   value="\\grvs10\Data\Intranet_test\Intranet_QA\VISTADAT\Data\Import data\PropertyAccounts"/>
+	<property name="SSIS_lease_com_email_cc"   value="Debarati.Bosu@aimco.com"/>
+	<property name="SSIS_lease_com_email_to"   value="Debarati.Bosu@aimco.com"/>
+	<property name="SSIS_lease_com_email_username"   value="_DCOTSQL113"/>
+	<property name="SSIS_mktng_lost_email_attachment"   value="D:\Marketing\LostProperty.xls"/>
+	<property name="SSIS_mktng_lost_email_to"   value="Debarati.Bosu@aimco.com"/>
+	<property name="SSIS_mktng_lost_email_username"   value="_DCOTSQL113"/>
+	<property name="SSIS_mktng_lost_filepath"   value="D:\Marketing\LostProperty.xls"/>
+	<property name="Peoplesoft_dist_password"   value="Welc0m3Tst"/>
+	<property name="Peoplesoft_dist_Servername"   value="FS91TST.WORLD"/>
+	<property name="Peoplesoft_dist_username"   value="Intranet"/>
+	<property name="Peoplesoft_GL_password"   value="Welc0m3Tst"/>
+	<property name="Peoplesoft_GL_Servername"   value="FS91TST.WORLD"/>
+	<property name="Peoplesoft_GL_username"   value="Intranet"/>
+	<property name="Peoplesoft_ven_password"   value="Welc0m3Tst"/>
+	<property name="Peoplesoft_ven_servername"   value="FS91TST.WORLD"/>
+	<property name="Peoplesoft_ven_username"   value="Intranet"/>
+	<property name="Peoplesoft_prop_password"   value="Welc0m3Tst"/>
+	<property name="Peoplesoft_prop_servername"   value="FS91TST.WORLD"/>
+	<property name="Peoplesoft_prop_username"   value="Intranet"/>
+	<property name="SSIS_plat_hr_file_path"   value="D:\JOB\user_data_aimco.txt"/>
+	<property name="SSIS_plat_hr_file_path_taleo"   value="D:\JOB\aimco_emp_imp.txt"/>
+	<property name="SSIS_plat_job_file_path"   value="D:\JOB\jobposition_data_aimco.txt"/>
+	<property name="SSIS_Plateau_file_path"   value="D:\JOB\organization_data_aimco.txt"/>
+	<property name="SSIS_PlateauFTP_Hirechain_filepath"   value="d:\job\Plateau_Hirechain\plateau.csv"/>
+	<property name="Stars_password"   value="Star5Tst"/>
+	<property name="Stars_servername"   value="STRSTST9.WORLD"/>
+	<property name="Stars_username"   value="starsTst"/>
+	<property name="SSIS_STARS_filepath"   value="\\grvs10\data\Intranet_test\Intranet_QA\denver\corphub_mtodate.txt"/>
+	<property name="SSIS_Verizon_file_path"   value="\\grvs12\data\Intranet_test\Intranet_QA\eftpserver\aimcoeftp"/>
+	<property name="SSIS_Ver_logfile_path"   value="D:\LogFiles\DTS_Verizon_PhoneFeed.log"/>
+	<property name="timecard_file_path"   value="\\dens02\Intranet_test\Intranet_QA\departments\HR\Staffing Team\Flexible Hours"/>
+	<property name="ep_password"   value="Welc0m3Tst"/>
+	<property name="ep_servername"   value="EPTST.WORLD"/>
+	<property name="ep_username"   value="Intranet"/>
+
+	<!-- Parameterized Value SQL Job-->
+	<property name="Intranet_Server_owner_login"   value="sa"/>
+	<property name="Intranet_server_Job_Disabled"   value="0"/>
+	<property name="Intranet_server_Schedule_Enabled"   value="1"/>
+	<property name="Intranet_server_email_operator_IntSpprt"   value="Internet Support"/>
+	<property name="Hor_to_int_logfile_path_1"   value="D:\AIMCOWeb\Apps\UnitAvailability\logs\Unit_Availability_SQL_Log.log"/>
+	<property name="Hor_to_int_logfile_path_2"   value="D:\AIMCOWeb\Apps\UnitAvailability\logs\Unit_Availability_SQL_Log.log"/>
+	<property name="Hor_to_int_logfile_path_3"   value="d:\sqllogs\OneSite - Convert OneSite values for eCustomer.log"/>
+	<property name="Hor_to_int_logfile_path_4"   value="D:\SQLLogs\OneSite Temp Repair Missing Pricing"/>
+	<property name="Hor_to_int_logfile_path_5"   value="D:\AIMCOWeb\Apps\UnitAvailability\logs\Unit_Availability_SQL_Log.log"/>
+	<property name="Hor_to_int_logfile_path_6"   value="D:\AIMCOWeb\Apps\UnitAvailability\logs\Unit_Availability_SQL_Log.log"/>
+	<property name="Hor_to_int_logfile_path_7"   value="D:\AIMCOWeb\Apps\UnitAvailability\logs\Unit_Availability_SQL_Log.log"/>
+	<property name="Hor_to_int_CmdExec_command_1"   value="D:\AIMCOWEB\Apps\UnitAvailability\UnitAvailabilityExport.exe"/>
+	<property name="Hor_to_int_logfile_path_8"   value="D:\AIMCOWeb\Apps\UnitAvailability\logs\Unit_Availability_SQL_Log.log"/>
+	<property name="Hor_to_int_CmdExec_command_2"   value="D:\AIMCOWEB\Apps\FileMover\FileMover.exe UnitAvailability"/>
+	<property name="Hor_to_int_logfile_path_9"   value="D:\AIMCOWeb\Apps\UnitAvailability\logs\Unit_Availability_SQL_Log.log"/>
+	<property name="Service_now_cmdexec_command"   value="D:\AIMCOWEB\Apps\FileMover\FileMover.exe Service_Now"/>
+	<property name="Intranet_server_email_operator_DBA"   value="DBA"/>
+	<property name="Intranet_server_proxy"   value="Proxy_DCOTSQL113"/>
+	<property name="Plateau_ord_Convert_UTF_Path"   value="D:\AIMCOWEB\Apps\Convert_UTF\Convert_UTF"/>
+	<property name="Intranet_server_page_operator_greenville"   value="Greenville Operator"/>
+	<property name="SSIS_Verizon_logfile_path"   value="D:\LogFiles\JOB_Verizon_PhoneFeed.log"/>
+	
+	<!-- Parameterized Values of Application -->
+	
+	<property name="Intranet_DB_UnitAvailability_Host_NotifyEmail"  value="Debarati.Bosu@aimco.com"/>
+	<property name="Intranet_DB_UnitAvailability_Export_ErrorEmail"  value="Debarati.Bosu@aimco.com"/>
+	<property name="Intranet_DB_UnitAvailability_Servicehost_NotifyEmail"  value="Debarati.Bosu@aimco.com"/>
+	<property name="Intranet_DB_UnitAvailability_Servicehost_baseAddresses"  value="http://localhost:8015/UnitAvailability"/>
+
+	<property name="Decision_Support_eCustomer800Number_DataSource"  value="DCOTSQL114"/>
+	<property name="Decision_Support_eCustomer800Number_WebServiceURL"  value="http://DCOTESB156:8380/RealpageServices/ebws/Webservice/CommonWebservice"/>
+	<property name="RealPage_UDS_Import_RealPageRootDirectory"  value="d:\data\RealPage_UDS\"/>
+	<property name="RealPage_UDS_Import_RealPageUDSFTPSite"  value="uds.realpage.com"/>
+	<property name="RealPage_UDS_Import_RealPageUDSFTPUserName"  value="1188988"/>
+	<property name="RealPage_UDS_Import_RealPageEncryptedPassword"  value="EAAAAHsXipRyduAMqePylSUJk8LuYNMZRCXoyEeRUJUxn2Rj"/>
+	<property name="Decision_Support_Pricing_Feed_Copy"  value="\\grvs12\Data\Horizon_Test\Horizon_QA\PricingDBBackup\PricingBackup.bak.gz"/>
+	
+	<property name="Sandbox_CRGenerator_DestPath"   value="\\DCOTIIS033\Content\reports\reportfiles\crystal"/>
+	<property name="Sandbox_EnvironmentalReports_EnvRptsDir"   value="\\grvs10\data\Horizon_Test\Horizon_QA\horizon\EnvironmentalReports"/>
+	<property name="Sandbox_EnvironmentalReports_EmailFrom"   value="EnvRpts@aimco.com"/>
+	<property name="Sandbox_EnvironmentalReports_EmailOnJobSuccess"   value="Debarati.Bosu@aimco.com"/>
+	<property name="Sandbox_EnvironmentalReports_EmailOnJobFailure"   value="Debarati.Bosu@aimco.com"/>
+	<property name="Sandbox_EnvironmentalReportsFTP.ps1_SQLserver"   value="DCOTSQL117"/>
+	<property name="Sandbox_MaintSurveyImport_ErrorEmail"   value="Debarati.Bosu@aimco.com"/>
+	<property name="Sandbox_MaintSurveyImport_LogDir"   value="D:\data_import\MaintSurvey\log"/>
+	<property name="Sandbox_NYPropertyResidentStatement_EmailOnJobSuccess"   value="Debarati.Bosu@aimco.com"/>
+	<property name="Sandbox_NYPropertyResidentStatement_EmailOnJobFailure"   value="Debarati.Bosu@aimco.com"/>
+	<property name="Sandbox_PA_File_Handler_LogDir"   value="D:\data_import\PA\Log\"/>
+	<property name="Sandbox_mirror_env_rpts_sourcepath"   value="\\grvs10\data\Horizon_Test\Horizon_QA\horizon\EnvironmentalReports"/>
+	<property name="Sandbox_mirror_env_rpts_destinationpath"   value="\\DCOTIIS033\Content\Environmental_Reports"/>
+	<property name="Sandbox_mirror_env_rpts_logpath"   value="D:\TSQLLogs\Copy Environmental Reports - Step 1.txt"/>
+	<property name="Sandbox_FTPDownload_userid"   value="1188988"/>
+	<property name="Sandbox_FTPDownload_password"   value="EAAAAHsXipRyduAMqePylSUJk8LuYNMZRCXoyEeRUJUxn2Rj"/>
+	<property name="Sandbox_FTPDownload_fullbackupcheckday"   value="0"/>
+	<property name="Sandbox_FTPDownload_filenamepattern"   value="U1188988_"/>
+	<property name="Sandbox_FTPFullBackupCheckerAndRename_userid"   value="1188988"/>
+	<property name="Sandbox_FTPFullBackupCheckerAndRename_password"   value="EAAAAHsXipRyduAMqePylSUJk8LuYNMZRCXoyEeRUJUxn2Rj"/>
+	<property name="Sandbox_FTPFullBackupCheckerAndRename_fullbackupcheckday"   value="0"/>
+	<property name="Sandbox_FTPFullBackupCheckerAndRename_filenamepattern"   value="U1188988_"/>
+	<property name="Sandbox_FTPMailSend_userid"   value="1188988"/>
+	<property name="Sandbox_FTPMailSend_password"   value="EAAAAHsXipRyduAMqePylSUJk8LuYNMZRCXoyEeRUJUxn2Rj"/>
+	<property name="Sandbox_FTPMailSend_recipients"   value="Debarati.Bosu@aimco.com"/>
+	<property name="Sandbox_FTPMailSend_filenamepattern"   value="Incr_U1188988_"/>
+	<property name="Sandbox_UDSRemoveOldPart_userid"   value="1188988"/>
+	<property name="Sandbox_UDSRemoveOldPart_password"   value="EAAAAHsXipRyduAMqePylSUJk8LuYNMZRCXoyEeRUJUxn2Rj"/>
+	<property name="Sandbox_UDSRemoveOldPart_fullbackupcheckday"   value="0"/>
+	<property name="Sandbox_UDSRemoveOldPart_filenamepattern"   value="old_U1188988_"/>
+	<property name="Sandbox_RealPage_UDS_UDS_movefile_del_path"   value="\\grvs12\data\Horizon_Test\Horizon_Dev\RealPage\Web\Prod\UDS\*.bak"/>
+	<property name="Sandbox_RealPage_UDS_UDS_movefile_copy_path"   value="\\grvs12\data\Horizon_Test\Horizon_Dev\RealPage\Web\Prod\UDS\*.bak"/>
+	<property name="Sandbox_PricingXML_EmailOnJobSuccess"   value="Debarati.Bosu@aimco.com"/>
+	<property name="Sandbox_PricingXML_EmailOnJobFailure"   value="Debarati.Bosu@aimco.com"/>
+	<property name="Sandbox_PricingXML_EmailOnRecommendationsNeeded"   value="Debarati.Bosu@aimco.com"/>
+	<property name="Sandbox_PricingXML_EmailOnRecommendationsLoadStatus"   value="Debarati.Bosu@aimco.com"/>
+	<property name="Sandbox_PricingXML_EmailOnPROFITNewLeaseLoadStatus"   value="Debarati.Bosu@aimco.com"/>
+	<property name="Sandbox_PricingXML_EmailOnPROFITAmenityLoadStatus"   value="Debarati.Bosu@aimco.com"/>
+	<property name="Sandbox_PricingXML_UnitPricingUploadExceptionReportURL"   value="http://DCOTSQL117/ReportServer?%2fDevelopment%2fPricing%2fUnit+Pricing+Upload+Exceptions"/>
+	<property name="Sandbox_PricingXML_UnitPricingNotificationReportURL"   value="http://DCOTSQL117/ReportServer?%2fDevelopment%2fPricing%2fUnit+Pricing+Notification"/>
+	<property name="Sandbox_PricingXML_RenewalPricingUploadExceptionReportURL"   value="http://DCOTSQL117/ReportServer?%2fDevelopment%2fPricing%2fRenewal+Pricing+Upload+Exceptions"/>
+	<property name="Sandbox_PricingXML_ExportedAutomatedRenewalLettersReportURL"   value="http://DCOTSQL117/ReportServer"/>
+	<property name="Sandbox_PricingXML_PricingWebsiteURL"   value="http://stagehorizon2015.aimco.com/Pricing/Pricing.aspx"/>
+	<property name="Sandbox_PricingXML_TestingMode"   value="TRUE"/>
+	<property name="Sandbox_PricingXML_DebugMode"   value="TRUE"/>
+	<property name="Sandbox_PricingXML_EmailRenewalLettersToAddress"   value="Debarati.Bosu@aimco.com"/>
+	<property name="Sandbox_PricingXML_ARLOutputPath"   value="D:\data_export\RenewalLetters"/>
+	<property name="Sandbox_PricingXML_FTPUserName"   value="gaw/aimco"/>
+	<property name="Sandbox_PricingXML_FTPPassword"   value="aipw*89"/>
+	<property name="Sandbox_PricingXML_YSDataIssuesEmailTo"   value="Debarati.Bosu@aimco.com"/>
+	<property name="Sandbox_PricingXML_ProsKeyFile"   value="D:\AIMCOWeb\Apps\PricingXML\ppss-dev.pbk"/>
+	<property name="Sandbox_PricingXML_ProsURL"   value="http://lppsdev:8080/axis2/services/SystemService"/>
+	
+	<!-- Mail Notification Configuration -->
+	<property name="mail.send.required"	value="true"/>	
+	<property name="email.to.list"		value="pinaki.ghosh@aimco.com;sam.elliott@aimco.com;rukmini.dutt@aimco.com;rajat.biswas@aimco.com;Biplab.Chakraborty@aimco.com"/>
+	<property name="email.cc.list"		value=""/>
+	<property name="email.bcc.list"		value=""/>
+	<property name="email.from"		value="Subversion@aimco.com"/>
+	<property name="smtp.host"		value="smtp.aimco.com"/>
+	<property name="smtp.port"		value="25"/>
+	<property name="ssl"			value="false"/>
+		
+</project>
