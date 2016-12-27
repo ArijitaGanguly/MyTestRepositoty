@@ -1,0 +1,2764 @@
+ <project name="aimco_net">
+
+	<!-- Command Execution Section -->
+	<target name="build_gac" depends="init_gac, svn_update, compile_gac, prepared_appdeployable, zip_gac, stop_iis, stop_complus, copy_deployable, decrypt_password, install_gac, start_iis" />
+	<target name="build_com" depends="init_com, svn_update, compile_com, prepared_appdeployable, zip_com, stop_iis, stop_complus ,copy_deployable, decrypt_password, register_com, start_iis" />	
+	<target name="build_wsservice" depends="init_wins, svn_update,process_templates, compile_wins, prepared_appdeployable, backup_deployed_item, stop_windows_service, copy_deployable, decrypt_password, reintall_service" />
+	<target name="build_scheduletask" depends="init_schedule, svn_update,process_templates, compile_exe, prepared_appdeployable, backup_deployed_item, stop_stask, copy_deployable, decrypt_password,create_stask,copy_scheduled_Task_Config" />
+	<target name="build_exe" depends="init_exe, svn_update,process_templates, compile_exe,prepared_appdeployable, backup_deployed_item_exe, copy_deployable_exe" />	
+	<target name="build_web" depends="init_web, svn_update,process_templates, compile_web,  prepared_appdeployable, stop_iis, zip_web, copy_deployable, restructure_application, start_iis"/>
+	<target name="iis_setup" depends="init_iis_setup, stop_iis, Create_IISWebsite, set_apppool, create_contents_vd, convert_to_app_for_restructure_application, set_default_page, start_iis"/>
+	<target name="copy_config_file" depends="init_configfile, svn_update,copy_config_deployable,zip_config" />
+	<target name="deploy_sql" depends="init_sql, svn_update, copy_sql_deployable, zip_sql_file, sql_deployment" />
+	<target name="deploy_ssas" depends="init_ssas, svn_update,process_templates, move_to_build_dir,backup_bids_item,prepare_appdeployable_bids,deploy_asdb" />
+	<target name="deploy_ssrs" depends="init_ssrs, svn_update, copy_to_build_dir, ssrs_backup, prepare_appdeployable_ssrs, ssrs_create_folder, ssrs_rdl_deploy, ssrs_decrypt_password, ssrs_rds_deploy, mapping_ssrs"/>
+	<target name="deploy_ssis" depends="init_ssis, svn_update,process_templates,compile_ssis, prepare_ssis_build_folder, backup_bids_item, prepare_appdeployable_bids,deploy_ispac" />
+	<target name="deploy_job_sql" depends="init_job_sql, svn_update,process_templates,copy_job_sql_deployable, zip_sql_file,job_sql_deployment, job_proxy_mapping" />
+	<target name="build_realpage_exe" depends="init_realpage_exe, svn_update,process_templates, compile_exe, prepared_appdeployable, backup_deployed_item_exe,copy_deployable"/>
+	<!-- Command Rollback Section -->
+	<target name="rollback_gac" depends="init_gac, stop_complus, unzip_prepared_appdeploy, stop_iis, decrypt_password, install_gac, start_iis" />
+	<target name="rollback_com" depends="init_com, stop_complus, unzip_prepared_appdeploy, stop_iis, decrypt_password, register_com, start_iis" />
+	<target name="rollback_wsservice" depends="init_wins, unzip_prepared_appdeploy, decrypt_password, reintall_service" />
+	<target name="rollback_scheduletask" depends="init_schedule, unzip_prepared_appdeploy,stop_stask,decrypt_password,create_stask,copy_scheduled_Task_Config "/>
+	<target name="rollback_exe" depends="init_exe, unzip_prepared_appdeploy_exe,copy_deployable_exe" />
+	<target name="rollback_intranet_web" depends="init_web, stop_iis, unzip_prepared_appdeploy, start_iis"/>
+	<target name="rollback_ssis" depends="init_ssis,unzip_bids_prepared_appdeploy,deploy_ispac"/>
+	<target name="rollback_job_sql" depends="init_job_sql,unzip_bids_prepared_appdeploy,job_sql_deployment,job_proxy_mapping"/>
+	<target name="rollback_ssas" depends="init_ssas,unzip_bids_prepared_appdeploy,deploy_asdb"/>
+	<target name="rollback_ssrs" depends="init_ssrs,unzip_bids_prepared_appdeploy,ssrs_create_folder,ssrs_rdl_deploy, ssrs_decrypt_password, ssrs_rds_deploy, mapping_ssrs"/>
+	<target name="rollback_realpage_exe" depends="init_realpage_exe, unzip_prepared_appdeploy"/>
+	<target name="rollback_config_file" depends="init_configfile,unzip_prepared_config_appdeploy,copy_config_deployable"/>
+	<target name="rollback_sql" depends="init_sql,unzip_bids_prepared_appdeploy,sql_deployment"/>
+	<!-- Command Rollback Section -->
+	
+	<!-- Common Initialization Section -->
+	<!-- Read DEV configuration file if exist -->
+	<property name="dev.main.include.file" value="..\Server Configurations\DEV\#${env}.include"/>
+	<property name="dev.merge.file" value="..\Server Configurations\DEV\#${env}_merge.include"/>
+	<if test="${file::exists(dev.main.include.file) and file::exists(dev.merge.file)}">
+		<include buildfile="${dev.main.include.file}"/>
+		<include buildfile="${dev.merge.file}"/>
+	</if>
+	<!-- Read QA configuration file if exist -->
+	<property name="qa.main.include.file" value="..\Server Configurations\QA\#${env}.include"/>
+	<property name="qa.merge.file" value="..\Server Configurations\QA\#${env}_merge.include"/>
+	<if test="${file::exists(qa.main.include.file) and file::exists(qa.merge.file)}">
+		<include buildfile="${qa.main.include.file}"/>
+		<include buildfile="${qa.merge.file}"/>
+	</if>
+	<!-- Read Pre_Prod configuration file if exist -->
+	<property name="preprod.main.include.file" value="..\Server Configurations\Pre_Prod\#${env}.include"/>
+	<property name="preprod.merge.file" value="..\Server Configurations\Pre_Prod\#${env}_merge.include"/>
+	<if test="${file::exists(preprod.main.include.file) and file::exists(preprod.merge.file)}">
+		<include buildfile="${preprod.main.include.file}"/>
+		<include buildfile="${preprod.merge.file}"/>
+	</if>
+	<!-- Read UAT configuration file if exist -->
+	<property name="uat.main.include.file" value="..\Server Configurations\UAT\#${env}.include"/>
+	<property name="uat.merge.file" value="..\Server Configurations\UAT\#${env}_merge.include"/>
+	<if test="${file::exists(uat.main.include.file) and file::exists(uat.merge.file)}">
+		<include buildfile="${uat.main.include.file}"/>
+		<include buildfile="${uat.merge.file}"/>
+	</if>
+	<!-- Read PROD configuration file if exist -->
+	<property name="prod.main.include.file" value="..\Server Configurations\PROD\#${env}.include"/>
+	<property name="prod.merge.file" value="..\Server Configurations\PROD\#${env}_merge.include"/>
+	<if test="${file::exists(prod.main.include.file) and file::exists(prod.merge.file)}">
+		<include buildfile="${prod.main.include.file}"/>
+		<include buildfile="${prod.merge.file}"/>
+	</if>
+	
+	<property name="verbose" value="true"/>
+	<tstamp property="build.startdate" pattern="yyyy-MM-dd_HH:mm:ss" verbose="true" />
+	<tstamp property="build.lastdate" pattern="yyyyMMdd_HHmmss" verbose="true" />
+	<property name="temp.sourcecode.dir" value="${temp.sourcecode.build.output.dir}\SourceCode"/>
+	<property name="temp.buildoutput.dir" value="${temp.sourcecode.build.output.dir}\BuildOutput"/>
+	<property name="temp.appdeploy.base.dir" value="${temp.sourcecode.build.output.dir}\Appdeploy"/>
+	<property name="temp.backup.dir" value="${temp.sourcecode.build.output.dir}\Backup"/>
+	<property name="nant.onsuccess" value="success_target" />
+	<property name="nant.onfailure" value="faliur_target" />
+	<property name="project.type"		value=""/>
+	<property name="release.note"		value="..\..\Release_Note\release.htm"/>
+	<property name="deploy_status" value="Failed"/>
+	<property name="last.executed.target" value=""/>
+	<property name="svn.branch.merge" value=""/>
+	<property name="svn.revision.to" value=""/>
+	<property name="svn.branch.revision.from" value=""/>
+	<property name="svn.branch.revision.to" value=""/>
+	<property name="backup.zipfile"	value=""/>
+	<property name="rollback.file"		value=""/>
+	<property name="website.under.app.level"	value=""/>	
+	
+	<!-- Start: Password decryption part -->
+		
+	<target name="decrypt_password">
+		<!-- Service Account Info -->
+		<property   name="service.account.decrypt.userid"  value="${service.account.userid}" />	
+		<property   name="decrypt.input.info"  value="${service.account.password}" />
+		<call target="decrypt_info" />
+		<property   name="service.account.decrypt.password" value="${string::trim(decrypt.output.info)}" />
+		
+		<!-- COM Admin Decrypt -->	
+		<property   name="com.admin.decrypt.userid"  value="${com.admin.userid}" />
+		<property   name="decrypt.input.info"  value="${com.admin.password}" />	
+		<call target="decrypt_info" />
+		<property   name="com.admin.decrypt.password"  value="${string::trim(decrypt.output.info)}" />
+	</target>
+	
+	<target name="ssrs_decrypt_password">
+		<!-- Service Account Info -->
+		<property   name="ssrs.userId"  value="${ssrs.user}" />	
+		<property   name="decrypt.input.info"  value="${ssrs.pass}" />
+		<call target="decrypt_info" />
+		<property   name="ssrs.decrypt.password" value="${string::trim(decrypt.output.info)}" />		
+	</target>
+		
+	<target name="decrypt_info">
+		<mkdir dir="${temp.sourcecode.build.output.dir}" if="${not directory::exists(temp.sourcecode.build.output.dir)}" />
+		<property   name="decrypt.output.file"  value="${temp.sourcecode.build.output.dir}\psw.txt" />
+		<exec program="..\..\NANT v0.92\Thirdparty Tools\Password Decryptor\Encrypt_Decrypt.exe" output="${decrypt.output.file}">
+			<arg value="d" />
+			<arg value="${decrypt.input.info}" />
+		</exec>
+		<loadfile  file="${decrypt.output.file}"  property="decrypt.output.info" />
+		<delete file="${decrypt.output.file}" />
+	</target>
+	
+	<!-- End: Password decryption part -->
+		
+	<!--Start: Initialization Section -->
+	
+	<target name="init_gac">
+		<property name="svn.repos"		value="${gac.repos}"/>
+		<property name="svn.branch.merge"		value="${gac.merge.with.branch}"/>
+		<property name="svn.branch.url"		value="${gac.merge.branch.repos}"/>
+		<property name="project.type"		value="GAC"/>
+		<property name="svn.branch.revision.from"		value="${gac.merge.branch.revision.from}"/>
+		<property name="svn.branch.revision.to"		value="${gac.merge.branch.revision.to}"/>
+		<property name="svn.revision.to"		value="${gac.revision.to}"/>
+		<property name="specific.project"		value="${gac.specific.project}"/>
+		<property name="temp.project.source.dir" value="${temp.sourcecode.dir}\${project.type}" />
+		<property name="temp.build.output.dir"	value="${temp.buildoutput.dir}\${project.type}"/>
+		<property name="temp.appdeploy.dir"	value="${temp.appdeploy.base.dir}\${project.type}"/>
+		<property name="deployed.backup.dir"	value="${backup.dir}\${project.type}"/>
+		<property name="backup.zipfile"	value="${deployed.backup.dir}/backup_${string::to-lower(project.type)}_${build.lastdate}.zip"/>		
+		<property name="deploy.dir"		value="${gac.deploy.dir}" />
+		<property name="deployale.project.name"		value="" />
+		<property name="rollback.path"		value="${deployed.backup.dir}\${rollback.file}"/>
+	</target>
+	
+	<target name="init_com">		
+		<property name="svn.repos"		value="${com.repos}"/>
+		<property name="svn.branch.merge"		value="${com.merge.with.branch}"/>
+		<property name="svn.branch.url"		value="${com.merge.branch.repos}"/>
+		<property name="project.type"		value="COM"/>
+		<property name="svn.branch.revision.from"		value="${com.merge.branch.revision.from}"/>
+		<property name="svn.branch.revision.to"		value="${com.merge.branch.revision.to}"/>
+		<property name="svn.revision.to"		value="${com.revision.to}"/>
+		<property name="specific.project"		value="${com.specific.project}"/>
+		<property name="temp.project.source.dir" value="${temp.sourcecode.dir}\${project.type}" />
+		<property name="temp.build.output.dir"	value="${temp.buildoutput.dir}\${project.type}"/>
+		<property name="temp.appdeploy.dir"	value="${temp.appdeploy.base.dir}\${project.type}"/>
+		<property name="deployed.backup.dir"	value="${backup.dir}\${project.type}"/>
+		<property name="backup.zipfile"	value="${deployed.backup.dir}/backup_${string::to-lower(project.type)}_${build.lastdate}.zip"/>
+		<property name="deploy.dir"		value="${com.deploy.dir}" />
+		<property name="deployale.project.name"		value="" />
+		<property name="rollback.path"		value="${deployed.backup.dir}\${rollback.file}"/>
+	</target>
+	
+	<target name="init_wins">
+		<property name="svn.repos"		value="${wins.repos}"/>
+		<property name="svn.branch.merge"		value="${wins.merge.with.branch}"/>
+		<property name="svn.branch.url"		value="${wins.merge.branch.repos}"/>
+		<property name="project.type"		value="WindowsService"/>
+		<property name="svn.branch.revision.from"		value="${wins.merge.branch.revision.from}"/>
+		<property name="svn.branch.revision.to"		value="${wins.merge.branch.revision.to}"/>
+		<property name="svn.revision.to"		value="${wins.revision.to}"/>
+		<property name="specific.project"		value="${wins.specific.project}"/>
+		<property name="temp.project.source.dir" value="${temp.sourcecode.dir}\${project.type}" />
+		<property name="temp.build.output.dir"	value="${temp.buildoutput.dir}\${project.type}"/>
+		<property name="temp.appdeploy.dir"	value="${temp.appdeploy.base.dir}\${project.type}"/>
+		<property name="deployed.backup.dir"	value="${backup.dir}\${project.type}"/>
+		<property name="backup.zipfile"	value="${deployed.backup.dir}/backup_${string::to-lower(project.type)}_${build.lastdate}.zip"/>
+		<property name="deploy.dir"		value="${wins.deploy.dir}" />
+		<property name="deployale.project.name"		value="" />
+		<property name="rollback.path"		value="${deployed.backup.dir}\${rollback.file}"/>
+	</target>
+	
+	<target name="init_exe"> 
+		<property name="svn.repos"		value="${exe.repos}"/>
+		<property name="svn.branch.merge"		value="${exe.merge.with.branch}"/>
+		<property name="svn.branch.url"		value="${exe.merge.branch.repos}"/>
+		<property name="project.type"		value="EXE"/>
+		<property name="svn.branch.revision.from"		value="${exe.merge.branch.revision.from}"/>
+		<property name="svn.branch.revision.to"		value="${exe.merge.branch.revision.to}"/>
+		<property name="svn.revision.to"		value="${exe.revision.to}"/>
+		<property name="specific.project"		value="${exe.specific.project}"/>
+		<property name="temp.project.source.dir" value="${temp.sourcecode.dir}\${project.type}" />
+		<property name="temp.build.output.dir"	value="${temp.buildoutput.dir}\${project.type}"/>
+		<property name="temp.appdeploy.dir"	value="${temp.appdeploy.base.dir}\${project.type}"/>
+		<property name="deployed.backup.dir"	value="${backup.dir}\${project.type}"/>
+		<property name="backup.zipfile"	value="${deployed.backup.dir}/backup_${string::to-lower(project.type)}_${build.lastdate}.zip"/>
+		<property name="deploy.dir"		value="${exe.deploy.dir}" />
+		<property name="deployale.project.name"		value="" />
+		<property name="rollback.path"		value="${deployed.backup.dir}\${rollback.file}"/>
+	</target>
+	
+	<target name="init_schedule">		
+		<property name="svn.repos"		value="${schedule.repos}"/>
+		<property name="svn.branch.merge"		value="${schedule.merge.with.branch}"/>
+		<property name="svn.branch.url"		value="${schedule.merge.branch.repos}"/>
+		<property name="project.type"		value="ScheduleTask"/>
+		<property name="svn.branch.revision.from"		value="${schedule.merge.branch.revision.from}"/>
+		<property name="svn.branch.revision.to"		value="${schedule.merge.branch.revision.to}"/>
+		<property name="svn.revision.to"		value="${schedule.revision.to}"/>
+		<property name="specific.project"		value="${schedule.specific.project}"/>
+		<property name="temp.project.source.dir" value="${temp.sourcecode.dir}\${project.type}" />
+		<property name="temp.build.output.dir"	value="${temp.buildoutput.dir}\${project.type}"/>
+		<property name="temp.appdeploy.dir"	value="${temp.appdeploy.base.dir}\${project.type}"/>
+		<property name="deployed.backup.dir"	value="${backup.dir}\${project.type}"/>
+		<property name="backup.zipfile"	value="${deployed.backup.dir}/backup_${string::to-lower(project.type)}_${build.lastdate}.zip"/>
+		<property name="deploy.dir"		value="${schedule.deploy.dir}" />
+		<property name="deployale.project.name"		value="" />
+		<property name="appdeploy.schedule.task.config.dir"		value="${temp.appdeploy.base.dir}\ScheduleTaskCreationConfig" />
+		<property name="deploy.schedule.task.config.dir"		value="${deploy.dir}\ScheduleTaskCreationConfig" />
+		<property name="rollback.path"		value="${deployed.backup.dir}\${rollback.file}"/>
+		<property name="backup.project" value="${schedule.backup.project}"/>
+	</target>
+	
+	<target name="init_web">
+		<property name="svn.repos"		value="${website.repos}"/>
+		<property name="svn.branch.merge"		value="${website.merge.with.branch}"/>
+		<property name="svn.branch.url"		value="${website.merge.branch.repos}"/>
+		<property name="project.type"		value="Web"/>
+		<property name="svn.branch.revision.from"		value="${website.merge.branch.revision.from}"/>
+		<property name="svn.branch.revision.to"		value="${website.merge.branch.revision.to}"/>
+		<property name="svn.revision.to"		value="${website.revision.to}"/>
+		<property name="specific.project"		value="${website.specific.project}"/>
+		<property name="app_name" value="${string::substring(website.repos, string::last-index-of(website.repos,'/')+1, string::get-length(website.repos)-string::last-index-of(website.repos,'/')-1)}" />
+		<property name="temp.project.source.dir" value="${temp.sourcecode.dir}\${project.type}\${app_name}" />
+		<property name="temp.build.output.dir"	value="${temp.buildoutput.dir}\${project.type}\${app_name}"/>
+		<property name="temp.appdeploy.dir"	value="${temp.appdeploy.base.dir}\${project.type}\${app_name}"/>
+		<property name="deployed.backup.dir"	value="${backup.dir}\${project.type}\${app_name}"/>
+		<property name="website.under.app.level"	value="${website.application.level.deployment}"/>
+		<property name="backup.zipfile"	value="${deployed.backup.dir}/backup_${string::to-lower(project.type)}_${build.lastdate}.zip"/>
+		<property name="deploy.dir"		value="${website.deploy.dir}" />
+		<property name="deployale.project.name"		value="" />
+		<property name="valid.web.project" value=""/>
+		<property name="app_web_name" value="" />
+		<property name="rollback.path"		value="${deployed.backup.dir}\${rollback.file}"/>		
+		<!-- Apppool property declaration  -->
+		<property name="default.app.pool.classic" value="${app.pool.clasic.asp}"/>
+		<property name="app.pool.net45" value="${app.pool.net45}"/>
+		<property name="app.pool.bit32.net45" value="${app.pool.bit32.net45}"/>
+	</target>
+	
+	<target name="init_configfile">
+		<property name="project.type"		value="Config"/>
+		<property name="svn.repos"		value="${config.file.repos}"/>
+		<property name="svn.revision.to"		value="${config.revision.to}"/>
+		<property name="svn.branch.merge"		value="${config.merge.with.branch}"/>
+		<property name="svn.branch.url"		value="${config.merge.branch.repos}"/>
+		<property name="svn.branch.revision.from"		value="${config.merge.branch.revision.from}"/>
+		<property name="svn.branch.revision.to"		value="${config.merge.branch.revision.to}"/>
+		<property name="temp.project.source.dir" value="${temp.sourcecode.dir}\${project.type}" />
+		<property name="temp.appdeploy.dir"	value="${temp.appdeploy.base.dir}\${project.type}\${deployment.environment}"/>
+		<property name="deployed.backup.dir"	value="${backup.dir}\${project.type}"/>
+		<property name="backup.zipfile"	value="${deployed.backup.dir}/backup_${string::to-lower(project.type)}_${build.lastdate}.zip"/>
+		<property name="rollback.path"		value="${deployed.backup.dir}\${rollback.file}"/>	
+		<property name="config.rollback"	value="0"/>
+	</target>
+	
+	<target name="init_sql">
+		<property name="project.type"		value="SQL"/>
+		<property name="svn.repos"		value="${sql.file.repos}"/>
+		<property name="svn.revision.to"		value="${sql.revision.to}"/>
+		<property name="svn.branch.merge"		value="${sql.merge.with.branch}"/>
+		<property name="svn.branch.url"		value="${sql.merge.branch.repos}"/>
+		<property name="svn.branch.revision.from"		value="${sql.merge.branch.revision.from}"/>
+		<property name="svn.branch.revision.to"		value="${sql.merge.branch.revision.to}"/>
+		<property name="temp.project.source.dir" value="${temp.sourcecode.dir}\${project.type}" />
+		<property name="temp.appdeploy.dir"	value="${temp.appdeploy.base.dir}\${project.type}"/>
+		<property name="specific.project"		value="${sql.specific.project}"/>
+		<property name="deployed.backup.dir"	value="${backup.dir}\${project.type}"/>
+		<property name="backup.zipfile"	value="${deployed.backup.dir}/backup_${string::to-lower(project.type)}_${build.lastdate}.zip"/>
+		<if test="${directory::exists(temp.project.source.dir)}">
+			<delete dir="${temp.project.source.dir}" />
+		</if>
+		<property name="rollback.path"		value="${backup.dir}\${project.type}\${rollback.file}"/>
+	</target>
+	
+	<target name="init_job_sql">
+		<property name="project.type"		value="SQL_JOB"/>		
+		<property name="svn.repos"		value="${job.sql.file.repos}"/>
+		<property name="svn.revision.to"		value="${job.sql.revision.to}"/>
+		<property name="svn.branch.merge"		value="${job.sql.merge.with.branch}"/>
+		<property name="svn.branch.url"		value="${job.sql.merge.branch.repos}"/>
+		<property name="svn.branch.revision.from"		value="${job.sql.merge.branch.revision.from}"/>
+		<property name="svn.branch.revision.to"		value="${job.sql.merge.branch.revision.to}"/>
+		<property name="temp.project.source.dir" value="${temp.sourcecode.dir}\${project.type}" />
+		<property name="temp.appdeploy.dir"	value="${temp.appdeploy.base.dir}\${project.type}\${job.sql.connection.string.sub.path}"/>
+		<property name="connection.string"	value="${job.sql.connection.string.path}"/>
+		<property name="deployed.backup.dir"	value="${backup.dir}\${project.type}"/>
+		<property name="backup.zipfile"	value="${deployed.backup.dir}/backup_${string::to-lower(project.type)}_${build.lastdate}.zip"/>
+		<property name="specific.project"		value="${job.sql.specific.project}"/>
+		<property name="temp.appdeploy.proxy.sql.dir"	value="${temp.appdeploy.base.dir}\${project.type}\Alter_Proxy"/>
+		<property name="rollback.path"		value="${deployed.backup.dir}\${rollback.file}"/>
+	</target>
+	
+	<target name="init_iis_setup"> 
+		<call target="init_web"/>
+		<property name="project.type"		value="IIS Setup"/>
+		<property name="website.private.IP.address"		value="${website.private.IP}"/>
+	</target>
+	
+	<!-- SSRS Target Starts Here -->
+			
+	<target name="init_ssrs" >			
+		<tstamp property="build.startdate" pattern="yyyyMMdd_HHmmss" verbose="true" />
+		<property name="project.type"		value="SSRS"/>
+		<property name="svn.repos"		value="${ssrs.repos}"/>
+		<property name="svn.revision.to"		value="${ssrs.revision.to}"/>		
+		<property name="svn.branch.merge"		value="${ssrs.merge.with.branch}"/>
+		<property name="svn.branch.url"		value="${ssrs.merge.branch.repos}"/>
+		<property name="svn.branch.revision.from"		value="${ssrs.merge.branch.revision.from}"/>
+		<property name="svn.branch.revision.to"		value="${ssrs.merge.branch.revision.to}"/>
+		<property name="specific.project"		value="${ssrs.specific.project}"/>
+		<property name="temp.project.source.dir" value="${temp.sourcecode.dir}\${project.type}" />
+		<property name="temp.build.output.dir"	value="${temp.buildoutput.dir}\${project.type}"/>
+		<property name="temp.ssrs.backup.dir" value="${backup.dir}\${project.type}"/>
+		<property name="temp.appdeploy.dir"	value="${temp.appdeploy.base.dir}\${project.type}"/>		
+		<property name="backup.zipfile"	value="${temp.ssrs.backup.dir}/backup_${string::to-lower(project.type)}_${build.lastdate}.zip"/>
+		<property name="deployale.project.name"		value="" />
+		<property name="rollback.path"		value="${temp.ssrs.backup.dir}\${rollback.file}"/>
+	</target>
+	
+	<target name="init_realpage_exe"> 
+		<property name="svn.repos"		value="${schedule.repos}"/>
+		<property name="svn.branch.merge"		value="${schedule.merge.with.branch}"/>
+		<property name="svn.branch.url"		value="${schedule.merge.branch.repos}"/>
+		<property name="project.type"		value="RealPage_EXE"/>
+		<property name="svn.branch.revision.from"		value="${schedule.merge.branch.revision.from}"/>
+		<property name="svn.branch.revision.to"		value="${schedule.merge.branch.revision.to}"/>
+		<property name="svn.revision.to"		value="${schedule.revision.to}"/>
+		<property name="specific.project"		value="${schedule.specific.project}"/>
+		<property name="temp.project.source.dir" value="${temp.sourcecode.dir}\${project.type}" />
+		<property name="temp.build.output.dir"	value="${temp.buildoutput.dir}\${project.type}"/>
+		<property name="temp.appdeploy.dir"	value="${temp.appdeploy.base.dir}\${project.type}"/>
+		<property name="deployed.backup.dir"	value="${backup.dir}\${project.type}"/>
+		<property name="backup.zipfile"	value="${deployed.backup.dir}/backup_${string::to-lower(project.type)}_${build.lastdate}.zip"/>
+		<property name="deploy.dir"		value="${schedule.deploy.dir}" />
+		<property name="deployale.project.name"		value="" />
+		<property name="rollback.path"		value="${deployed.backup.dir}\${rollback.file}"/>
+	</target>
+	<!--End: Initialization Section -->
+	
+	<!-- Start: SVN Task Section -->
+	
+	<!-- Init the svn.username variable -->
+	<target name="svn.username_init">
+		<property name="svn.username" 
+			if="${property::exists('svn.userdomain') and property::exists('svn.userlogin')}"
+			value="${string::to-upper(svn.userdomain)}\${string::to-lower(svn.userlogin)}" />
+	</target>
+		
+	<!-- SVN_COMPLETE:  Will get the specified repository directory and put on local computer. -->
+	<target name="svn_complete">
+		<property name="last.executed.target" value="SVN complete code checked out"/>
+		<delete dir="${temp.project.source.dir}" failonerror="false"/> 
+		<svn-checkout uri="${svn.repos}" destination="${temp.project.source.dir}" revision="${svn.revision.to}" username="${svn.username}" quiet="false"/>
+	</target>
+
+	<!-- SVN_UPDATE:  Will update the local working copy to the latest HEAD or specific version in the repository. -->
+	<target name="svn_update" depends="svn.username_init">
+		<if test="${ not directory::exists(temp.project.source.dir)}">
+			<echo message="Directory does not exist on server, must get complete contents from repository"/>
+			<call target="svn_complete"/>
+		</if>		
+		<call target="svn_revert"/>	
+		<call target="svn_non_vers"/>	
+		<property name="last.executed.target" value="SVN code update"/>
+		<if test="${directory::exists(temp.project.source.dir)}">
+			<svn-update uri="${svn.repos}" destination="${temp.project.source.dir}" username="${svn.username}" quiet="false"/>
+		</if>
+		<!-- Merge with branch if required -->
+		<if test="${merge.with.branch == 'true' and svn.branch.merge == 'true'}">
+			<call target="svn_merge"/>
+			<call target="svn_check_conflicts"/>
+		</if>		
+	</target>
+	
+	<target name="svn_revert">
+		<property name="last.executed.target" value="SVN code revert"/>
+		<svn command="revert" uri="${svn.repos}" destination="${temp.project.source.dir}" username="${svn.username}">
+			<arg line="revert . --recursive" />
+		</svn>
+	</target>
+	
+	<target name="svn_merge">
+		<property name="last.executed.target" value="SVN code merge"/>
+		<echo message="Merging changes for branch: ${svn.branch.url} - from : ${svn.branch.revision.from} to : ${svn.branch.revision.to}" />
+		<svn command="merge" uri="${svn.repos}" username="${svn.username}">
+			<arg line="merge --force -r${svn.branch.revision.from}:${svn.branch.revision.to} &quot;${svn.branch.url}&quot; &quot;${temp.project.source.dir}&quot;" />
+		</svn>
+	</target>
+	
+	<target name="svn_check_conflicts">
+		<property name="last.executed.target" value="SVN code conflicts"/>
+		<property name="conflicts_file" value="${temp.sourcecode.dir}\${project.type}\conflicts.txt" />
+		<delete if="${file::exists(conflicts_file)}" file="${conflicts_file}" />
+		<exec program = "svn" workingdir="${temp.project.source.dir}" output="${conflicts_file}">
+			<arg line="stat" />
+		</exec>
+		<property name="temp.conflictexists" value="FALSE" />
+		<foreach item="Line" in="${conflicts_file}" property="fileline" if="${file::exists(conflicts_file)}" >
+			<if test="${string::starts-with(fileline,'C')}">
+				<property name="fileline.conflict" value="${string::substring(fileline,7,string::get-length(fileline)-7)}" />
+				<echo message="Warning file ${fileline.conflict} is conflicted" />
+				<property name="temp.conflictexists" value="TRUE" />
+			</if>
+		</foreach>
+		<fail if="${temp.conflictexists}" message="One or more files is conflicted, see messages above" />
+	</target>
+	
+	<target name="svn_non_vers">
+		<property name="last.executed.target" value="SVN non version file remove"/>
+		<property name="non_vers_file" value="${temp.sourcecode.dir}\${project.type}\remove_non_vers.txt" />
+		<delete if="${file::exists(non_vers_file)}" file="${non_vers_file}" />
+		<exec program = "svn" workingdir="${temp.project.source.dir}" output="${non_vers_file}">
+			<arg line="stat --no-ignore" />
+		</exec>
+		<foreach item="Line" in="${non_vers_file}" property="fileline"
+			if="${file::exists(non_vers_file)}" >
+			<if test="${string::starts-with(fileline,'?') or string::starts-with(fileline,'I')}">
+				<property name="fileline.delete" value="${string::substring(fileline,7,string::get-length(fileline)-7)}" />
+				<echo message="Deleting non-versioned file ${fileline.delete}" />
+				<delete dir="${temp.project.source.dir}/${fileline.delete}" />
+				<delete if="${file::exists(temp.project.source.dir+'/'+fileline.delete)}" file="${temp.project.source.dir}/${fileline.delete}" />
+			</if>
+		</foreach>
+	</target>
+	
+	<!-- End SVN Task Sections -->
+	
+	<!-- Start: Code Compile Sections -->
+	
+	<target name="compile_com">
+		<copy todir="${temp.build.output.dir}" overwrite="true">
+			<fileset basedir="${temp.project.source.dir}">
+				<include name="**/*.dll" />
+				<include name="**/*.tlb" />
+				<include name="**/*.VBR" />
+			</fileset>
+		</copy>
+	</target>
+	
+	<target name="compile_gac">
+		<property name="last.executed.target" value="Compile GAC components"/>
+		<foreach item="File" property="filename">  
+			<in>  
+				<items basedir="${temp.project.source.dir}" > 
+					<include name="**/*.csproj"/>
+					<include name="**/*.vbproj"/>
+				</items>  
+			</in>  
+			<do>	
+				<property name="to.compilegac" value=""/>
+				<script language="C#" prefix="aimco.nant" >
+					<references>
+						<include name="System.Xml.dll" />
+						<include name="System.Xml.Linq.dll" />
+						<include name="System.Core.Dll" />
+					</references>
+					<imports>
+						<import namespace="System.Xml" />
+						<import namespace="System.Xml.Linq" />
+						<import namespace="System.Collections.Generic" />
+						<import namespace="System.Linq" />
+					</imports>
+					<code>
+						<![CDATA[
+							public static void ScriptMain(Project project) {
+								String filename = project.Properties["filename"];
+								XNamespace msbuild = "http://schemas.microsoft.com/developer/msbuild/2003";
+								XDocument projDefinition = XDocument.Load(filename);
+								IEnumerable<string> references1 = projDefinition.Element(msbuild + "Project").Elements(msbuild + "PropertyGroup").Elements(msbuild + "OutputType").Select(refElem => refElem.Value);
+								foreach (string reference in references1)
+								{
+									if (reference.ToLower().Equals("library"))
+									{
+										IEnumerable<string> references = projDefinition.Element(msbuild + "Project").Elements(msbuild + "PropertyGroup").Elements(msbuild + "AssemblyOriginatorKeyFile").Select(refElem => refElem.Value);
+										foreach (string reference1 in references)
+										{
+											if (reference1 != string.Empty)
+											{
+												project.Properties["to.compilegac"] = reference;
+												break;
+											}
+										}
+									}
+								}
+							}
+						]]>
+					</code>
+				</script>
+				<if test="${string::get-length(to.compilegac) > 0}"> 
+					<property name="app_path" value="${string::substring(filename,0,string::last-index-of(filename,'\'))}" />
+					<echo message="Compiling App path : ${app_path}"/>
+					<property name="app_name" if="${string::contains(filename,'\')}" value="${string::substring(filename, string::last-index-of(filename,'\')+1, string::get-length(filename)-string::last-index-of(filename,'\')-8)}" />
+					<echo message="Compiling GAC Project : ${app_name}"/>
+					 <exec program="${framework::get-framework-directory('net-4.0')}\msbuild.exe">
+						<arg value="&quot;${filename}&quot; /t:rebuild /p:Configuration=Release /property:OutputDir=&quot;${app_path}\bin&quot; /property:OutputPath=&quot;${temp.build.output.dir}\${app_name}&quot;"/>
+					 </exec>
+				</if>
+			</do>  
+		</foreach>
+	</target>
+	
+	<target name="compile_wins">
+		<property name="last.executed.target" value="Compile Windows Services"/>
+		<foreach item="File" property="filename">  
+			<in>  
+				<items basedir="${temp.project.source.dir}" > 
+					<include name="**/ProjectInstaller.resx"/>
+				</items>  
+			</in>  
+			<do>						
+				<property name="app_path" value="${string::substring(filename,0,string::last-index-of(filename,'\'))}" />
+				<foreach item="File" property="windowserviceproj">  
+					<in>  
+						<items basedir="${app_path}" > 
+								<include name="*.csproj"/>
+						</items>  
+					</in>  
+					<do>
+						<echo message="Compiling Windows Service Project: ${windowserviceproj}"/>
+						<property name="app_name" if="${string::contains(windowserviceproj,'\')}" value="${string::substring(windowserviceproj, string::last-index-of(windowserviceproj,'\')+1, string::get-length(windowserviceproj)-string::last-index-of(windowserviceproj,'\')-8)}" />
+						<msbuild project="${windowserviceproj}" target="build">
+							<arg value="/property:Configuration=release" />
+							<arg value="/property:DebugSymbols=false" />
+							<arg value="/property:OutputPath=${temp.build.output.dir}/${app_name}" />
+						</msbuild>
+					</do> 
+				</foreach>
+			</do>  
+		</foreach>
+	</target>
+	
+	<target name="compile_exe">
+		<property name="last.executed.target" value="Compile executables"/>
+		<foreach item="File" property="filename">  
+			<in>  
+				<items basedir="${temp.project.source.dir}" > 
+					<include name="**/*.csproj"/>
+					<include name="**/*.vbproj"/>
+				</items>  
+			</in>  
+			<do>
+				<property name="to.compileexe" value=""/>
+				<script language="C#" prefix="aimco.nant" verbose="false">
+					<references>
+						<include name="System.Xml.dll" />
+						<include name="System.Xml.Linq.dll" />
+						<include name="System.Core.Dll" />
+					</references>
+					<imports>
+						<import namespace="System.Xml" />
+						<import namespace="System.Xml.Linq" />
+						<import namespace="System.Collections.Generic" />
+						<import namespace="System.Linq" />
+					</imports>
+					<code>
+						<![CDATA[
+							public static void ScriptMain(Project project) {
+								String filename = project.Properties["filename"];
+								 XNamespace msbuild = "http://schemas.microsoft.com/developer/msbuild/2003";
+								XDocument projDefinition = XDocument.Load(filename);
+								IEnumerable<string> references = projDefinition.Element(msbuild + "Project").Elements(msbuild + "PropertyGroup").Elements(msbuild + "OutputType").Select(refElem => refElem.Value);
+								foreach (string reference in references)
+								{
+									if (reference.ToLower().Equals("exe") || reference.ToLower().Equals("winexe")) 
+									{
+										project.Properties["to.compileexe"] = reference;
+										break;
+									}
+								}
+							}
+						]]>
+					</code>
+				</script>
+				<if test="${string::get-length(to.compileexe) > 0}">							
+					<property name="app_name" if="${string::contains(filename,'\')}" value="${string::substring(filename, string::last-index-of(filename,'\')+1, string::get-length(filename)-string::last-index-of(filename,'\')-8)}" />
+					<property name="project.present.name" value="${string::substring(filename, string::last-index-of(filename,'\')+1, string::get-length(filename)-string::last-index-of(filename,'\')-1)}"/>
+					<call target="project_present" />			
+					<if test="${string::get-length(project.present.solution) > 0}">
+						<msbuild project="${filename}" target="build">
+							<arg value="/property:Configuration=release" />
+							<arg value="/property:DebugSymbols=false" />
+							<arg value="/property:OutputPath=${temp.build.output.dir}/${app_name}" />
+						</msbuild>
+					</if>
+				</if>
+			</do>  
+		</foreach>
+		<!-- Copy Third party schedule task --> 
+		<if test="${project.type == 'EXE'}">
+			<call target="copy_otherstype_exe"/>
+		</if>
+	</target>
+	
+	<target name="project_present">	
+		<foreach item="File" property="solfilename">
+			<in>
+				<items basedir="${temp.project.source.dir}">
+					<include name="**/*.sln" />
+				</items>
+			</in>
+			<do>
+				<property name="project.present.solution" value=""/>
+				<script language="C#" prefix="aimco.nant" >
+					<references>
+						<include name="System.Core.Dll" />
+					</references>
+					<imports>
+						<import namespace="System.IO" />
+					</imports>
+					<code>
+						<![CDATA[
+							public static void ScriptMain(Project project) {
+								var Content = File.ReadAllText(project.Properties["solfilename"]);
+								 if (Content.Contains("\\"+project.Properties["project.present.name"]))
+								 {
+									project.Properties["project.present.solution"] ="Present";
+								 }
+							}
+						]]>
+					</code>
+				</script>
+			</do>
+		</foreach>
+	</target>
+	
+	<target name="copy_otherstype_schedule_task">
+		<if test="${directory::exists(appdeploy.schedule.task.config.dir)}">
+			<delete dir="${appdeploy.schedule.task.config.dir}" />
+		</if>
+		<!-- Copy others type(Only EXE source code not available) schedule task folder -->
+		<copy todir="${temp.appdeploy.dir}">
+			<fileset basedir="${temp.project.source.dir}\AimcoScheduledTasks_Others">
+				<exclude name="**/*.nant_template"/>
+				<include name="**/*.*"/>
+			</fileset>
+		</copy>
+		<!-- Copy configuration file to appdeploy folder -->
+		<foreach item="File" in="${temp.project.source.dir}\ScheduleTaskConfigurationFiles" property="filename">
+			<copy file="${filename}" todir="${appdeploy.schedule.task.config.dir}" overwrite="true"/>
+		</foreach>
+	</target>
+	
+	<target name="copy_otherstype_exe">		
+		<!-- Copy others type(Only EXE source code not available) -->
+		<copy todir="${temp.build.output.dir}">
+			<fileset basedir="${temp.project.source.dir}\Other_Code_Not_Available">
+				<exclude name="**/*.nant_template"/>
+				<include name="**/*.*"/>
+			</fileset>
+		</copy>
+	</target>
+	
+	<target name="compile_web">
+		<property name="last.executed.target" value="Compile and published websites"/>
+		<!-- Single file deployment for web -->
+		<foreach item="File" in="${temp.project.source.dir}" property="filename">
+			<copy file="${filename}" todir="${temp.build.output.dir}" overwrite="true"/>
+		</foreach>
+		<!-- Web Project deployment -->
+		<foreach item="Folder" property="foldername">
+			<in>
+				<items basedir="${temp.project.source.dir}" >
+					<include name="/*" />				
+					<exclude name=".svn" />
+					<exclude name="_svn" />
+				</items>
+			</in>
+			<do>
+				<echo message="Web Folder Name: ${foldername}" />
+				<property name="app_web_name" value="" />
+				<foreach item="File" property="webproject">
+					<in>
+						<items basedir="${foldername}">
+							<include name="**/*.csproj" />
+							<include name="**/*.vbproj" />
+						</items>
+					</in>
+					<do>
+						<echo message="Web Project: ${webproject}" />
+						<property name="app_web_name" value="${webproject}" />
+					</do>
+				</foreach>   
+				<!-- Compile and published If .csproj and .vbproj is available -->
+				<choose>
+					<when test="${string::get-length(app_web_name) > 0}">
+						<!-- Check if the project file is valid for web project -->
+						<call target="valid_web_project"/>
+						<if test="${valid.web.project =='Yes'}">
+							<property name="app_name" if="${string::contains(app_web_name,'\')}" value="${string::substring(app_web_name, string::last-index-of(app_web_name,'\')+1, string::get-length(app_web_name)-string::last-index-of(app_web_name,'\')-8)}" />
+							<!-- Compile if .csproj or .vbproj available-->							
+							<msbuild project="${app_web_name}" target="build">
+								<arg value=  "/p:Configuration=Release" />
+								<arg value="/property:DebugSymbols=false" />
+							</msbuild>
+												
+							<!-- Published web application -->
+							<property name="app_path" value="${string::substring(app_web_name,0,string::last-index-of(app_web_name,'\'))}" />
+							<exec program="C:\Windows\Microsoft.NET\Framework64\v4.0.30319\aspnet_compiler.exe">
+							  <arg value="-v none -p &quot;${app_path}&quot; -u -f &quot;${temp.build.output.dir}\${app_name}&quot; -fixednames" />
+							</exec>
+						</if>
+					</when>
+					<otherwise>
+						<!-- Published folder and website-->
+						<if test="${temp.project.source.dir != foldername}">
+							<property name="app_name" if="${string::contains(foldername,'\')}" value="${string::substring(foldername, string::last-index-of(foldername,'\')+1, string::get-length(foldername)-string::last-index-of(foldername,'\')-1)}" />
+							<if test="${app_name != 'ThirdParty'}">
+								<exec program="C:\Windows\Microsoft.NET\Framework64\v4.0.30319\aspnet_compiler.exe">
+								  <arg value="-v none -p &quot;${foldername}&quot; -u -f &quot;${temp.build.output.dir}\${app_name}&quot; -fixednames" />
+								</exec>
+							</if>
+						</if>
+					</otherwise>
+				</choose>
+			</do>
+		</foreach>		
+	</target>
+		
+	<target name="valid_web_project">
+		<property name="valid.web.project" value=""/>
+		<script language="C#" prefix="aimco.nant" >
+		<references>
+			<include name="System.Xml.dll" />
+			<include name="System.Xml.Linq.dll" />
+			<include name="System.Core.Dll" />
+		</references>
+		<imports>
+			<import namespace="System.Xml" />
+			<import namespace="System.Xml.Linq" />
+			<import namespace="System.Collections.Generic" />
+			<import namespace="System.Linq" />
+		</imports>
+		<code>
+			<![CDATA[
+				public static void ScriptMain(Project project) {
+					String filename = project.Properties["app_web_name"];
+					XNamespace msbuild = "http://schemas.microsoft.com/developer/msbuild/2003";
+					XDocument projDefinition = XDocument.Load(filename);
+					IEnumerable<string> references = projDefinition.Element(msbuild + "Project").Elements(msbuild + "PropertyGroup").Elements(msbuild + "UseIISExpress").Select(refElem => refElem.Value);
+					foreach (string reference in references)
+					{
+						if (reference != string.Empty)
+						{
+							project.Properties["valid.web.project"] = "Yes";
+							break;
+						}
+						else
+						{
+							project.Properties["valid.web.project"] = "No";
+						}
+					}
+				}
+			]]>
+		</code>
+	</script>
+	</target>
+	
+	<!-- End: Code Compile Sections -->
+	
+	<!-- Start :  Prepare and copy deployable-->
+	
+	<target name="prepared_appdeployable">
+		<call target="clean_appdeploy"/>
+		<choose>
+			<!-- Check for particular project from configuration file -->
+			<when test="${string::get-length(specific.project) > 0}">
+				<call target="prepared_appdeployable_partial"/>
+			</when>
+			<!-- For all projects folder to folder copy only -->
+			<otherwise>
+				<call target="prepared_appdeployable_full"/>
+			</otherwise>
+		</choose>
+		
+		<!-- Single file web deployment -->
+		<if test="${project.type == 'Web'}">
+			<foreach item="File" in="${temp.build.output.dir}" property="filename">
+				<copy file="${filename}" todir="${temp.appdeploy.dir}" overwrite="true"/>
+			</foreach>
+		</if>
+		
+		<if test="${project.type == 'GAC'}">
+			<!-- Copy Thirdpartys GAC items -->
+			<foreach item="File" property="filename">  
+				<in>
+					<items basedir="${temp.project.source.dir}\ThirdParty" >  
+						<include name="**/*.dll"/>
+					</items>
+				</in>
+				<do>
+					<copy file="${filename}" todir="${temp.appdeploy.dir}" overwrite="true"/>
+				</do>  
+			</foreach>
+		</if>
+		
+		<!-- Copy Third party schedule task --> 
+		<if test="${project.type == 'ScheduleTask'}">
+			<call target="copy_otherstype_schedule_task"/>
+		</if>	
+	</target>
+	
+	<target name="clean_appdeploy">
+		<!-- Delete appdeploy folder -->
+		<if test="${directory::exists(temp.appdeploy.dir)}">
+			<delete dir="${temp.appdeploy.dir}" />
+		</if>
+	</target>
+	
+	<target name="prepared_appdeployable_partial">
+		<foreach item="String" in="${specific.project}" delim="," property="project">
+			<do>
+			<property name="directorypath" value="${temp.build.output.dir}/${project}" />
+			<if test="${directory::exists(directorypath)}">
+				<choose>
+					<!-- For GAC and COM -->
+					<when test="${project.type == 'GAC' or project.type == 'COM'}">
+						<foreach item="File" property="filename">  
+							<in>
+								<items basedir="${temp.build.output.dir}\${project}" >  
+									<include name="**/*.dll"/>
+									<include name="**/*.tlb"/>
+								</items>
+							</in>
+							<do>
+								<copy file="${filename}" todir="${temp.appdeploy.dir}" overwrite="true"/>
+							</do>  
+						</foreach>
+					</when>
+					<!-- For others application Web, EXE, Windows service-->
+					<otherwise> 
+						<choose>
+							<!-- Root deployment for web application Aimco.External.Root -->
+							<when test="${project == 'Aimco.External.Root'}">
+								<copy todir="${temp.appdeploy.dir}">
+									<fileset basedir="${temp.build.output.dir}/${project}">
+										<include name="**/*.*"/>
+									</fileset>
+								</copy>
+							</when>
+							<otherwise> 
+								<copy todir="${temp.appdeploy.dir}/${project}">
+									<fileset basedir="${temp.build.output.dir}/${project}">
+										<include name="**/*.*"/>
+									</fileset>
+								</copy>
+							</otherwise>
+						</choose>	
+					</otherwise>
+				</choose>	
+				<property name="deployale.project.name" value="${deployale.project.name}:${project}"/>
+			</if>
+			</do> 
+		</foreach>
+	</target>
+	
+	<target name="prepared_appdeployable_full">
+		<foreach item="Folder" in="${temp.build.output.dir}" property="foldername">
+			<property name="app_name" if="${string::contains(foldername,'\')}" value="${string::substring(foldername, string::last-index-of(foldername,'\')+1, string::get-length(foldername)-string::last-index-of(foldername,'\')-1)}" />
+			<choose>
+				<!-- For GAC and COM -->
+				<when test="${project.type == 'GAC' or project.type == 'COM'}">
+					<foreach item="File" property="filename">  
+						<in>
+							<items basedir="${temp.build.output.dir}/${app_name}" >  
+								<include name="**/*.dll"/>
+								<include name="**/*.tlb"/>
+							</items>
+						</in>
+						<do>
+							<copy file="${filename}" todir="${temp.appdeploy.dir}" overwrite="true"/>
+						</do>  
+					</foreach>
+				</when>
+				<!-- For others application Web, EXE, Windows service-->
+				<otherwise>
+					<choose>
+						<!-- Root deployment for web application Aimco.External.Root -->
+						<when test="${app_name == 'Aimco.External.Root'}">
+							<copy todir="${temp.appdeploy.dir}">
+								<fileset basedir="${foldername}">
+									<include name="**/*.*"/>
+								</fileset>
+							</copy>
+						</when>
+						<otherwise> 				
+							<copy todir="${temp.appdeploy.dir}\${app_name}">
+								<fileset basedir="${foldername}">
+									<exclude name="**/*.nant_template"/>
+									<include name="**/*.*"/>
+								</fileset>
+							</copy>
+						</otherwise> 
+					</choose>
+				</otherwise> 
+			</choose>
+			<property name="deployale.project.name" value="${deployale.project.name}:${app_name}"/>
+		</foreach>
+	</target>	
+	
+	<!-- Copy deployable items from appdeploy folder to deploy folder -->
+	<target name="copy_deployable"> 
+		<copy todir="${deploy.dir}" overwrite="true">
+			<fileset basedir="${temp.appdeploy.dir}">
+				<exclude name="**/*.pdb"/>
+				<exclude name="**/*.sln"/>
+				<exclude name="**/*.suo"/>
+				<exclude name="**/*.vbproj"/>
+				<exclude name="**/*.nant_template"/>
+				<exclude name="**/*.csproj"/>
+				<include name="**/*"/>
+			</fileset>
+		</copy>
+	</target>
+	
+	<!-- Copy deployable items from appdeploy folder to deploy selected folder which is mentioned in config xml file: Default is E:\AimcoWeb\Apps -->
+	<target name="copy_deployable_exe">
+		<foreach item="String" in="${deployale.project.name}" delim=":" property="exe_app_name">
+			<do> 
+			<if test="${string::get-length(exe_app_name) > 0}">
+				<property name="exe.deploy.location" value=""/>
+				<xmlpeek failonerror="false"
+					file="..\Server Configurations\${deployment.environment}\Executable_Deploy_Location.xml"
+					xpath="/x:exe_path_config/x:exe_applications/x:application[@name = '${exe_app_name}']/@location"
+					property="exe.deploy.location">
+					<namespaces>
+						<namespace prefix="x" uri="http://www.gordic.cz/shared/project-config/v_1.0.0.0" />
+					</namespaces>
+				</xmlpeek>				
+				<!-- Depleoy the default location -->	
+				<if test="${string::get-length(exe.deploy.location) == 0}">
+					<property name="exe.deploy.location" value="${deploy.dir}"/>
+				</if>
+				<property name="copy.content.only" value=""/>
+				<xmlpeek failonerror="false"
+					file="..\Server Configurations\${deployment.environment}\Executable_Deploy_Location.xml"
+					xpath="/x:exe_path_config/x:exe_applications/x:application[@name = '${exe_app_name}']/@contentonly"
+					property="copy.content.only">
+					<namespaces>
+						<namespace prefix="x" uri="http://www.gordic.cz/shared/project-config/v_1.0.0.0" />
+					</namespaces>
+				</xmlpeek>
+				
+				<choose><!-- Copy Deployable content only. Top folder not required -->
+					<when test="${copy.content.only == 'true' }">
+						<copy todir="${exe.deploy.location}" overwrite="true">
+							<fileset basedir="${temp.appdeploy.dir}\${exe_app_name}">								
+								<include name="**/*"/>
+							</fileset>
+						</copy>
+					</when>
+					<otherwise> 				
+						<!-- Copy Deployable with in the folder -->
+						<copy todir="${exe.deploy.location}\${exe_app_name}" overwrite="true">
+							<fileset basedir="${temp.appdeploy.dir}\${exe_app_name}">								
+								<include name="**/*"/>
+							</fileset>
+						</copy>
+					</otherwise> 
+				</choose>
+			</if>
+			</do> 
+		</foreach>
+	</target>
+	
+	<target name="restructure_application">
+		<foreach item="String" in="${website.under.app.level}" delim="|" property="application.level.app">
+			<do> 
+				<property name="root_app_name" value="${string::substring(application.level.app,
+					string::last-index-of(application.level.app,'~')+1,
+					string::get-length(application.level.app)-string::last-index-of(application.level.app,'~')-1)}" />
+				<property name="child_app_name" value="${string::substring(application.level.app, 0,
+					string::get-length(application.level.app)-string::get-length(root_app_name)-1)}" />
+				<echo message="App-Name: ${child_app_name} ---- Root Name - ${root_app_name}" />
+				
+				<move todir="${deploy.dir}\${root_app_name}\${child_app_name}">
+					<fileset basedir="${deploy.dir}\${child_app_name}">
+						<include name="**/*"/>
+					</fileset>
+				</move>
+			</do> 
+		</foreach>
+	</target>
+	
+	<target name="convert_to_app_for_restructure_application">
+		<foreach item="String" in="${website.under.app.level}" delim="|" property="application.level.app">
+			<do> 
+				<property name="root_app_name" value="${string::substring(application.level.app,
+					string::last-index-of(application.level.app,'~')+1,
+					string::get-length(application.level.app)-string::last-index-of(application.level.app,'~')-1)}" />
+				<property name="child_app_name" value="${string::substring(application.level.app, 0,
+					string::get-length(application.level.app)-string::get-length(root_app_name)-1)}" />
+				<echo message="App-Name: ${child_app_name} ---- Root Name - ${root_app_name}" />
+				<!-- Convert to application -->
+				<exec program="c:\windows\System32\InetSrv\appcmd.exe" verbose="true" failonerror="false" >
+					<arg value="add app /site.name:&quot;${iis.website}&quot; /path:/${root_app_name}/${child_app_name} /physicalpath:&quot;${iis.prod.dir}\${root_app_name}\${child_app_name}&quot;"/>
+				</exec>
+				<!-- Set application pool -->
+				<exec program="c:\windows\System32\InetSrv\appcmd.exe" verbose="true" failonerror="false" >
+					<arg value="set app &quot;${iis.website}/${root_app_name}/${child_app_name}&quot; /applicationpool:${app.pool.net45}"/>
+				</exec>
+			</do> 
+		</foreach>
+	</target>
+	
+	<!-- End :  Copy File and Folder from buils output folder to app-deployable folder -->
+	
+	<!-- Start: Backup all deployed items -->
+	
+	<target name="backup_deployed_item">
+		<!-- Prepared backup directory -->
+		<if test="${string::get-length(deployale.project.name) > 0}">
+				<if test="${project.type == 'ScheduleTask'}">
+					<property name="deployale.project.name" value="${deployale.project.name}:${backup.project}"/>
+				</if>	
+			<foreach item="String" in="${deployale.project.name}" delim=":" property="project_name">
+				<do> 
+				<echo message="${deploy.dir}\${project_name}" />
+					<property name="directorypath" value="${deploy.dir}/${project_name}" />
+					<if test="${string::get-length(project_name) > 0}">
+						<if test="${directory::exists(directorypath)}">
+							<copy todir="${temp.backup.dir}/${project_name}">
+								<fileset basedir="${deploy.dir}\${project_name}">
+									<include name="**/*.*"/>
+								</fileset>
+							</copy>
+						</if>
+					</if>
+				</do> 
+			</foreach>
+			<!-- Zip all backup -->
+			<zip zipfile="${backup.zipfile}">
+				<fileset basedir="${temp.backup.dir}" prefix="">
+					<exclude name="**/*.txt"/>
+					<exclude name="**/*.log"/>
+					<include name="*" />
+					<include name="**/*" />
+				</fileset>
+			</zip>
+			<!-- Delete appdeploy folder -->
+			<if test="${property::exists('temp.backup.dir')}">
+				<delete dir="${temp.backup.dir}" />
+			</if>
+		</if>
+	</target>
+	<target name="backup_deployed_item_exe">
+		<!-- Prepared backup directory -->
+		<if test="${directory::exists(temp.backup.dir)}">
+			<delete dir="${temp.backup.dir}" />
+		</if>
+		<if test="${string::get-length(deployale.project.name) > 0}">
+			<foreach item="String" in="${deployale.project.name}" delim=":" property="project_name">
+				<do>
+					<property name="exe.deploy.location" value=""/>
+					<xmlpeek failonerror="false"
+						file="..\Server Configurations\${deployment.environment}\Executable_Deploy_Location.xml"
+						xpath="/x:exe_path_config/x:exe_applications/x:application[@name = '${project_name}']/@location"
+						property="exe.deploy.location">
+						<namespaces>
+							<namespace prefix="x" uri="http://www.gordic.cz/shared/project-config/v_1.0.0.0" />
+						</namespaces>
+					</xmlpeek>				
+					<!-- Depleoy the default location -->	
+					<if test="${string::get-length(exe.deploy.location) == 0}">
+						<property name="exe.deploy.location" value="${deploy.dir}"/>
+					</if>
+					
+					<property name="copy.content.only" value=""/>
+					<xmlpeek failonerror="false"
+						file="..\Server Configurations\${deployment.environment}\Executable_Deploy_Location.xml"
+						xpath="/x:exe_path_config/x:exe_applications/x:application[@name = '${project_name}']/@contentonly"
+						property="copy.content.only">
+						<namespaces>
+							<namespace prefix="x" uri="http://www.gordic.cz/shared/project-config/v_1.0.0.0" />
+						</namespaces>
+					</xmlpeek>
+					
+					<choose><!-- Copy Deployable content only. Top folder not required -->
+						<when test="${copy.content.only == 'true' }">
+							<property name="from.location" value="${temp.appdeploy.dir}\${project_name}"/>
+							<property name="backup.to.location" value="${temp.backup.dir}\${project_name}"/>
+							<property name="to.location" value="${exe.deploy.location}"/>
+						</when>
+						<otherwise> 				
+							<!-- Copy Deployable with in the folder -->
+							<property name="from.location" value="${temp.appdeploy.dir}\${project_name}"/>
+							<property name="to.location" value="${exe.deploy.location}\${project_name}"/>
+							<property name="backup.to.location" value="${temp.backup.dir}\${project_name}"/>
+						</otherwise> 
+					</choose>
+					<!-- Copyed files deployed location to backup location -->
+					<foreach item="File" property="app_deployed_filename">  
+						<in>
+							<items basedir="${from.location}" >								
+								<include name="**/*.*"/>
+							</items>
+						</in>
+						<do>							
+							<property name="deployed_filename" value="${string::replace(app_deployed_filename, from.location, to.location )}" />
+							<property name="backup_filename" value="${string::replace(app_deployed_filename,from.location, backup.to.location )}" />
+							<property name="backup_file_dir" value="${directory::get-parent-directory(backup_filename)}" />
+							<echo message="Backup DIR ${backup_file_dir}" />
+							<echo message="Deployed File Name ${deployed_filename}" />
+							<copy file="${deployed_filename}" todir="${backup_file_dir}" if="${file::exists(deployed_filename)}" overwrite="true"/>
+						</do>  
+					</foreach>
+		
+				</do> 
+			</foreach>
+			<!-- Zip all backup -->
+			<zip zipfile="${backup.zipfile}">
+				<fileset basedir="${temp.backup.dir}" prefix="">
+					<exclude name="**/*.txt"/>
+					<exclude name="**/*.log"/>
+					<include name="*" />
+					<include name="**/*" />
+				</fileset>
+			</zip>
+			<!-- Delete appdeploy folder -->
+			<if test="${directory::exists(temp.backup.dir)}">
+				<delete dir="${temp.backup.dir}" />
+			</if>
+		</if>
+	</target>
+		
+	<target name="zip_gac">
+		<zip zipfile="${backup.zipfile}">
+    	<fileset basedir="${deploy.dir}" prefix="">
+				<exclude name="**/*.txt"/>
+				<exclude name="**/*.log"/>
+				<include name="*.dll" />
+				<include name="*.tlb" />
+    	</fileset>
+		</zip>
+	</target>
+	
+	<target name="zip_com">
+		<zip zipfile="${backup.zipfile}">
+    	<fileset basedir="${deploy.dir}" prefix="">
+				<exclude name="**/*.txt"/>
+				<exclude name="**/*.log"/>
+				<include name="*" />
+    	</fileset>
+		</zip>
+	</target>
+	
+	<target name="zip_web">
+		<zip zipfile="${backup.zipfile}">
+    	<fileset basedir="${deploy.dir}" prefix="">
+				<include name="**/*" />
+    	</fileset>
+		</zip>
+	</target>
+	
+	<target name="zip_config">
+		<zip zipfile="${backup.zipfile}">
+    	<fileset basedir="${temp.appdeploy.dir}" prefix="">
+				<include name="**/*" />
+    	</fileset>
+		</zip>
+	</target>
+	<target name="zip_sql_file">
+		<zip zipfile="${backup.zipfile}">
+    	<fileset basedir="${temp.appdeploy.base.dir}\${project.type}" prefix="">
+				<include name="**/*" />
+    	</fileset>
+		</zip>
+	</target>
+	<!-- End: Backup all deployed items -->
+	
+	<!-- Start: IIS Task -->
+	
+	<target name="stop_iis">
+		<property name="last.executed.target" value="Stop IIS"/>
+		<!-- First, stop WWW -->
+		<if test="${iis.is80 == 'true'}">
+			<exec program="iisreset" >
+				<arg value="/STOP" />
+			</exec>
+		</if>
+	</target>
+	
+	<target name="start_iis">
+		<property name="last.executed.target" value="Start IIS"/>
+		<if test="${iis.is80 == 'true'}">
+			<exec program="iisreset" >
+				<arg value="/START" />
+			</exec>
+		</if>
+	</target>
+	
+	<!-- END: IIS Task  -->
+	
+	<!-- Start: COM Specific task -->
+	
+	<target name="stop_complus">
+		<property name="last.executed.target" value="Stop COM+ Components"/>
+		<exec program="cscript">
+			<arg value="stop_complus.vbs" />
+		</exec>
+	</target>
+	
+	<target name="register_com">
+		<property name="last.executed.target" value="COM+ Creation and Registration"/>
+		<foreach item="File" property="filename">
+			<in>
+				<items basedir="${temp.appdeploy.dir}">
+					<include name="**/*.dll" />
+				</items>
+			</in>
+			<do>
+				<!-- Register COM component-->
+				<property name="com.assembly" value="${path::get-file-name(filename)}" />
+				<property name="gac.assemblynameonly" value="${path::get-file-name-without-extension(filename)}" />
+				<choose>
+					<when test="${string::contains(com.admin.ad.projects,gac.assemblynameonly)}">
+						<exec program="..\..\NANT v0.92\Thirdparty Tools\ComPlusRegister\CustomCOMPlus.exe">
+							<arg value="${deploy.dir}\${com.assembly}" />
+							<arg value="${com.admin.decrypt.userid}" />
+							<arg value="${com.admin.decrypt.password}" />
+						</exec>
+					</when>
+					<otherwise>
+						<exec program="..\..\NANT v0.92\Thirdparty Tools\ComPlusRegister\CustomCOMPlus.exe">
+							<arg value="${deploy.dir}\${com.assembly}" />
+							<arg value="${service.account.decrypt.userid}" />
+							<arg value="${service.account.decrypt.password}" />
+						</exec>
+					</otherwise>
+				</choose>
+			</do>
+		</foreach>
+	</target>
+	
+	<!-- Register and create COM+ for tlb only -->
+	<target name="register_com_tlb">
+		<property name="last.executed.target" value="TLB Registration"/>
+		<foreach item="File" property="filename">
+			<in>
+				<items basedir="${temp.appdeploy.dir}">
+					<include name="**/*.tlb" />
+				</items>
+			</in>
+			<do>
+				<property name="com.assembly" value="${path::get-file-name(filename)}" />
+				<property name="tlb.assembly" value="${deploy.dir}\${com.assembly}" />
+				<exec program="..\..\NANT v0.92\Thirdparty Tools\ComPlusRegister\CustomCOMPlus.exe">
+					<arg value="${deploy.dir}\${com.assembly}" />
+					<arg value="${service.account.decrypt.userid}" />
+					<arg value="${service.account.decrypt.password}" />
+				</exec>	
+				<!-- Register using regasm at Framework 64bit-->
+				<if test="${file::exists(path::change-extension(tlb.assembly,'.dll'))}">
+					<property name="tlb.dll" value="${path::change-extension(tlb.assembly,'.dll')}" />
+					<exec program="regasm" 
+						workingdir="${deploy.dir}"
+						basedir="C:\Windows\Microsoft.NET\Framework64\v4.0.30319">
+						<arg value="/tlb" />
+						<arg value="${tlb.dll}" />
+					</exec>
+					<!-- Register using regasm at Framework 32bit-->
+					<exec program="regasm" 
+						workingdir="${deploy.dir}"
+						basedir="C:\Windows\Microsoft.NET\Framework\v4.0.30319">
+						<arg value="/tlb" />
+						<arg value="${tlb.dll}" />
+					</exec>
+				</if>
+			</do>
+		</foreach>
+	</target>	
+	
+	<!-- End: COM Specific Configuration Task -->
+	
+	<!-- Start: GAC Specific Configuration Task -->
+	
+	<target name="install_gac">
+		<property name="last.executed.target" value="Re-Install GAC Components"/>
+		<foreach item="File" property="filename">
+			<in>
+				<items basedir="${temp.appdeploy.dir}">
+					<include name="**/*.dll" />
+				</items>
+			</in>
+			<do>
+				<property name="gac.assemblynameonly" value="${path::get-file-name-without-extension(filename)}" />
+				<property name="gac.assembly" value="${path::get-file-name(filename)}" />
+				<!-- Un-register GAC -->
+				<exec program="gacutil" 
+					workingdir="${deploy.dir}"
+					basedir="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0A\bin\NETFX 4.0 Tools">
+					<arg value="/u" />
+					<arg value="${gac.assemblynameonly}" />
+				</exec>
+				<!-- Register GAC -->
+				<exec program="gacutil" 
+					workingdir="${deploy.dir}"
+					basedir="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0A\bin\NETFX 4.0 Tools">
+					<arg value="/i" />
+					<arg value="${deploy.dir}\${gac.assembly}" />
+				</exec>
+			</do>
+		</foreach>
+		<!-- Register tlb  -->
+		<call target="register_com_tlb"/>
+	</target>
+	
+	<!-- End: GAC Specific Configuration Task -->
+	
+	<!-- Start: Windows Service Specific Configuration Task -->
+	
+	<target name="stop_windows_service">
+		<property name="last.executed.target" value="Stop Windows services"/>
+		<foreach item="String" in="${deployale.project.name}" delim=":" property="serviceName">
+			<do>
+				<if test="${string::get-length(serviceName) > 0}">
+					<foreach item="File" property="filename">  
+						<in>  
+							<items basedir="${deploy.dir}\${serviceName}" >
+								<include name="**/*.exe"/>
+							</items>  
+						</in>  
+						<do>
+							<!-- Service name hard codded -->
+							<if test="${serviceName == 'SharedWebContentService'}">
+								<property name="serviceName" value="Shared Web Content Service" />
+							</if>
+							<if test="${serviceName == 'UnitAvailabilityServiceHost'}">
+								<property name="serviceName" value="Unit Availability Service" />
+							</if>
+							<!-- Stop windows services -->
+							<if test="${service::is-installed(serviceName,'.') and service::is-running(serviceName,'.')}">
+								<!-- <exec program="sc" failonerror="false">
+								  <arg line="config &quot;${serviceName}&quot; start= disabled"/>
+								</exec> -->
+								<exec program="sc" failonerror="false">
+								  <arg line="stop &quot;${serviceName}&quot;"/>
+								</exec>							
+								<!-- <servicecontroller action="Stop" service="${serviceName}" /> -->
+							</if>
+						</do> 
+					</foreach>
+				</if>
+			</do> 
+		</foreach>	
+	</target>
+	
+	<target name="reintall_service">
+		<property name="last.executed.target" value="Re-install Windows service"/>
+		<foreach item="String" in="${deployale.project.name}" delim=":" property="serviceName">
+		<do> 
+			<if test="${string::get-length(serviceName) > 0}">
+				<echo message = "Re-Deploy Windows Service: ${serviceName}" />
+				<foreach item="File" property="filename">  
+					<in>  
+						<items basedir="${deploy.dir}\${serviceName}" >
+							<include name="**/*.exe"/>
+						</items>  
+					</in>  
+					<do>
+						<!-- Service name hard codded -->
+						<if test="${serviceName == 'SharedWebContentService'}">
+							<property name="serviceName" value="Shared Web Content Service" />
+						</if>
+						<if test="${serviceName == 'UnitAvailabilityServiceHost'}">
+							<property name="serviceName" value="Unit Availability Service" />
+						</if>
+						
+						<choose> <!-- Install all service(except lead service) using framework64 -->
+							<when test="${serviceName != 'LeadService'}">
+								<!-- Uninstall Windows service-->						
+								<exec program="${framework::get-framework-directory('net-4.0')}\InstallUtil.exe" if="${service::is-installed(serviceName,'.')}">
+								  <arg value="-u" />
+								  <arg value="${filename}" />      
+								 </exec>
+								 <!-- Install Windows service-->
+								 <exec program="${framework::get-framework-directory('net-4.0')}\InstallUtil.exe">
+								  <arg value="-i" />
+								  <arg value="/username=${service.account.decrypt.userid}" />
+								  <arg value="/password=${service.account.decrypt.password}" />
+								  <arg value="/unattended" />
+								  <arg value="${filename}" />      
+								 </exec>
+							</when>
+							<otherwise>
+								<!-- Uninstall Windows service-->
+								<exec program="C:\Windows\Microsoft.NET\Framework\v4.0.30319\InstallUtil.exe" if="${service::is-installed(serviceName,'.')}">
+									  <arg value="-u" />
+									  <arg value="${filename}" />      
+								 </exec>
+								 <!-- Install Windows service-->
+								 <exec program="C:\Windows\Microsoft.NET\Framework\v4.0.30319\InstallUtil.exe">
+									  <arg value="-i" />
+									  <arg value="/username=${service.account.decrypt.userid}" />
+									  <arg value="/password=${service.account.decrypt.password}" />
+									  <arg value="/unattended" />
+									  <arg value="${filename}" />      
+								 </exec>
+							</otherwise>
+						</choose>
+						<echo message="Successfully Installed: ${filename}"/> 
+					</do>  
+				</foreach>
+			</if>
+		</do> 
+		</foreach>	
+	</target>
+	
+	<!-- End: Windows Service Specific Configuration Task -->
+	
+	<!-- Start: Scheduled Task Specific Configuration -->
+	<target name="stop_stask">
+		<if test="${not directory::exists(appdeploy.schedule.task.config.dir)}">
+			<echo message="Inside the Stop_stask" />
+			<copy todir="${appdeploy.schedule.task.config.dir}" overwrite="true">
+			<fileset basedir="${temp.appdeploy.dir}\ScheduleTaskCreationConfig">
+				<exclude name="**/*.nant_template"/>
+				<include name="**/*.*"/>
+			</fileset>
+			</copy>
+			<delete dir="${temp.appdeploy.dir}\ScheduleTaskCreationConfig" />			
+		</if>	
+		<property name="last.executed.target" value="Stopped Schedule Task from task scheduler"/>
+		<foreach item="File" in="${appdeploy.schedule.task.config.dir}" property="scedulexmlfile">
+			<!-- Stop Scedule Task from Task sceduler -->
+			<property name="scheduletaskname" value="${path::get-file-name-without-extension(scedulexmlfile)}" />
+			<exec program="schtasks" failonerror="false">
+			  <arg line="/end /tn &quot;${scheduletaskname}&quot;" />
+			</exec>
+		</foreach>
+	</target>
+	
+	<target name="create_stask">
+		<property name="last.executed.target" value="Schedule Task Creation at  task scheduler"/>
+		<foreach item="File" in="${appdeploy.schedule.task.config.dir}" property="scedulexmlfile">
+			<!-- Change logon userid by service account user id -->
+			<xmlpoke file="${scedulexmlfile}" xpath="/nhc:Task/nhc:Principals/nhc:Principal/nhc:UserId" value="${service.account.decrypt.userid}">
+				<namespaces>
+					<namespace prefix="nhc" uri="http://schemas.microsoft.com/windows/2004/02/mit/task" />
+				</namespaces>
+			</xmlpoke>
+			<!-- Change auther id -->
+			<xmlpoke file="${scedulexmlfile}" xpath="/nhc:Task/nhc:RegistrationInfo/nhc:Author" value="${service.account.decrypt.userid}">
+				<namespaces>
+					<namespace prefix="nhc" uri="http://schemas.microsoft.com/windows/2004/02/mit/task" />
+				</namespaces>
+			</xmlpoke>
+			<!-- Change service account password -->
+						
+			<property name="scheduletaskname" value="${path::get-file-name-without-extension(scedulexmlfile)}" />
+			<echo message="Schedule Task: ${scheduletaskname}"/> 
+			<!-- Delete Scedule Task from Task sceduler -->
+			<exec program="schtasks" failonerror="false">
+			  <arg line="/Delete"/>
+			  <arg line="/tn &quot;${scheduletaskname}&quot; /F" />
+			</exec>
+			<!-- Create Scedule Task -->			
+			<exec program="schtasks">
+			  <arg line="/Create /RU &quot;${service.account.decrypt.userid}&quot; /RP &quot;${service.account.decrypt.password}&quot;" />
+			  <arg line="/XML &quot;${scedulexmlfile}&quot;" />
+			  <arg line="/TN &quot;${scheduletaskname}&quot;" />
+			</exec>
+		</foreach>
+	</target>
+	
+	<!-- End: Scheduled Task Specific Configuration -->
+	
+	<!-- Start: Web Set up -->
+	
+	<target name="Create_IISWebsite">	
+		<property name="last.executed.target" value="Website Creation"/>
+		<exec program="c:\windows\System32\InetSrv\appcmd.exe" failonerror="false" >
+			<arg value="add site /name:${iis.website} /physicalpath:&quot;${iis.prod.dir}&quot;"/>
+		</exec>
+		<!-- set host name -->
+		<exec program="c:\windows\System32\InetSrv\appcmd.exe" failonerror="false" >
+			<arg value="set site /site.name:&quot;${iis.website}&quot; /+bindings.[protocol='http',bindingInformation='${website.private.IP.address}:80:${iis.website}']"/>
+		</exec>
+		
+		<exec program="c:\windows\System32\InetSrv\appcmd.exe" failonerror="false" >
+			<arg value="set site /site.name:&quot;${iis.website}&quot; /+bindings.[protocol='https',bindingInformation='${website.private.IP.address}:443:${iis.website}']"/>
+		</exec>
+	</target>
+	
+	<target name="Create_Apppool">
+		<property name="last.executed.target" value="App pool Creation"/>
+		<exec program="c:\windows\System32\InetSrv\appcmd.exe" verbose="true" failonerror="false" >
+			<arg value="add apppool /name:${default.app.pool.classic} /managedRuntimeVersion:v4.0"/>
+		</exec>	
+		<exec program="c:\windows\System32\InetSrv\appcmd.exe" verbose="true" failonerror="false" >
+			<arg value="add apppool /name:${app.pool.net45} /managedRuntimeVersion:v4.0"/>
+		</exec>		
+	</target>
+	
+	<target name="set_apppool">
+		<property name="last.executed.target" value="App-pool settings"/>
+		<foreach item="Folder" property="foldername">
+			<in>
+				<items basedir="${iis.prod.dir}" >
+					<include name="/*" />
+				</items>
+			</in>
+			<do>				
+				<!-- Created application and set applicationpool for .Net 4.5 application-->
+				<property name="project.isnet45" value="" />
+				<script language="C#" prefix="aimco.nant" >
+					<references>
+						<include name="System.Core.Dll" />
+					</references>
+					<imports>
+						<import namespace="System.IO" />
+						<import namespace="System.Linq" />
+					</imports>
+					<code>
+						<![CDATA[
+							public static void ScriptMain(Project project) {
+								 if (Directory.Exists(project.Properties["foldername"]+"\\bin") 
+									&& Directory.GetFiles(project.Properties["foldername"]+"\\bin").Count() > 0 
+									&& (Directory.GetFiles(project.Properties["foldername"]).Contains(project.Properties["foldername"]+"\\web.config")
+									|| Directory.GetFiles(project.Properties["foldername"]).Contains(project.Properties["foldername"]+"\\Web.config")))
+									{
+										project.Properties["project.isnet45"]="True";
+									}
+							}
+						]]>
+					</code>
+				</script>
+				<property name="app_name" if="${string::contains(foldername,'\')}"
+								value="${string::substring(foldername,
+								string::last-index-of(foldername,'\')+1,
+								string::get-length(foldername)-string::last-index-of(foldername,'\')-1)}" />
+				<if test="${iis.prod.dir == foldername}">
+					<!-- Set Root Application pool -->					
+					<exec program="c:\windows\System32\InetSrv\appcmd.exe" verbose="true" failonerror="false" >
+						<arg value="set app &quot;${iis.website}/&quot; /applicationpool:${default.root.app.pool}"/>
+					</exec>					
+					<!-- Enable Windows Authentication Disable Anonymous Authentication-->		
+					<property name="anonymous.auth" value="False" />
+					<property name="windows.auth" value="True" />
+					<!-- Enable Anonymous Authentication Disable Windows Authentication -->					
+					<if test="${string::contains(anonymous.auth.enable.project, iis.website)}">
+						<property name="anonymous.auth" value="True" />
+						<property name="windows.auth" value="False" />
+					</if>		
+					<!-- Set Anonymous Authentication -->
+					<exec program="c:\windows\System32\InetSrv\appcmd.exe" verbose="true" failonerror="false" >
+						<arg value="set config &quot;${iis.website}/&quot; -section:system.webServer/security/authentication/anonymousAuthentication /enabled:&quot;${anonymous.auth}&quot; /commit:apphost"/>
+					</exec>
+					<!-- Set Windows Authentication -->
+					<exec program="c:\windows\System32\InetSrv\appcmd.exe" verbose="true" failonerror="false" >
+						<arg value="set config &quot;${iis.website}/&quot; -section:system.webServer/security/authentication/windowsAuthentication /enabled:&quot;${windows.auth}&quot; /commit:apphost"/>
+					</exec>
+				</if>
+				<!-- ASP application need to create convert to application -->
+				<if test="${string::contains(website.asp.convert.to.app, app_name)}">
+					<echo message="Created application: ${app_name}" />	
+					<exec program="c:\windows\System32\InetSrv\appcmd.exe" verbose="true" failonerror="false" >
+						<arg value="add app /site.name:&quot;${iis.website}&quot; /path:/${app_name} /physicalpath:&quot;${foldername}&quot;"/>
+					</exec>
+					<!-- Set application pool -->
+					<exec program="c:\windows\System32\InetSrv\appcmd.exe" verbose="true" failonerror="false" >
+						<arg value="set app &quot;${iis.website}/${app_name}&quot; /applicationpool:${app.pool.net45}"/>
+					</exec>
+				</if>
+				
+				<if test="${string::get-length(project.isnet45) > 0}">
+					<if test="${iis.prod.dir != foldername}">
+						<echo message="Created application: ${app_name}" />						
+						<!-- Created Application -->
+						<exec program="c:\windows\System32\InetSrv\appcmd.exe" verbose="true" failonerror="false" >
+							<arg value="add app /site.name:&quot;${iis.website}&quot; /path:/${app_name} /physicalpath:&quot;${foldername}&quot;"/>
+						</exec>
+						<!-- Set Application pool -->
+						<echo message="Set application pool: ${app_name}" />
+						<exec program="c:\windows\System32\InetSrv\appcmd.exe" verbose="true" failonerror="false" >
+							<arg value="set app &quot;${iis.website}/${app_name}&quot; /applicationpool:${app.pool.net45}"/>
+						</exec>
+					</if>
+					<!-- Set windows authentication disabled and  anonymous authentication enable -->
+					<if test="${string::contains(anonymous.auth.enable.project, app_name + ',')}">
+						<echo message="Enable Anonymous Authentication for: ${app_name}" />
+						<!-- Enable Anonymous Authentication -->
+						<exec program="c:\windows\System32\InetSrv\appcmd.exe" verbose="true" failonerror="false" >
+							<arg value="set config &quot;${iis.website}/${app_name}&quot; -section:system.webServer/security/authentication/anonymousAuthentication /enabled:&quot;True&quot; /commit:apphost"/>
+						</exec>
+						<!-- Disabled windows Authentication -->
+						<exec program="c:\windows\System32\InetSrv\appcmd.exe" verbose="true" failonerror="false" >
+							<arg value="set config &quot;${iis.website}/${app_name}&quot; -section:system.webServer/security/authentication/windowsAuthentication /enabled:&quot;False&quot; /commit:apphost"/>
+						</exec>
+					</if>
+				</if>
+				<!-- Set 32bit app-pool -->
+				<if test="${string::contains(bit32.required.app, app_name)}">
+					<exec program="c:\windows\System32\InetSrv\appcmd.exe" verbose="true" failonerror="false" >
+						<arg value="set app &quot;${iis.website}/${app_name}&quot; /applicationpool:${app.pool.bit32.net45}"/>
+					</exec>
+				</if>
+			</do>
+		</foreach>
+	</target>
+	
+	<target name="set_default_page">
+		<property name="last.executed.target" value="Website default page settings"/>
+		<foreach item="String" in="${website.default.page}" delim="|" property="default_app_page">
+			<do> 
+				<property name="app_default_page" value="${string::substring(default_app_page,
+					string::last-index-of(default_app_page,'~')+1,
+					string::get-length(default_app_page)-string::last-index-of(default_app_page,'~')-1)}" />
+				<property name="app_name" value="${string::substring(default_app_page, 0,
+					string::get-length(default_app_page)-string::get-length(app_default_page)-1)}" />
+				<exec program="c:\windows\System32\InetSrv\appcmd.exe" verbose="true" failonerror="false" >
+					<arg value="set config &quot;${iis.website}/${app_name}&quot; /section:defaultDocument /+files.[value='${app_default_page}']"/>
+				</exec>
+			</do> 
+		</foreach>	
+	</target>
+	
+	<target name="create_contents_vd">
+		<property name="last.executed.target" value="Content virtual directory Creation"/>
+		<!-- Create Root level virtual directory -->
+		<foreach item="String" in="${website.content.vd.required.root}" delim="," property="root_app_name">
+			<do>
+			<exec program="c:\windows\System32\InetSrv\appcmd.exe" verbose="true" failonerror="false" >
+				<arg value="add vdir /app.name:&quot;${iis.website}/&quot; /path:&quot;/${root_app_name}&quot; /physicalPath:&quot;${iis.contentdir}\${root_app_name}&quot;"/>
+			</exec>
+			</do>
+		</foreach>
+		<!-- Create Application level virtual directory -->
+		<foreach item="String" in="${website.content.vd.required.app.lebel}" delim="|" property="app_lebel_app">
+			<do> 
+				<property name="app_lebel_vd" value="${string::substring(app_lebel_app,
+					string::last-index-of(app_lebel_app,'~')+1,
+					string::get-length(app_lebel_app)-string::last-index-of(app_lebel_app,'~')-1)}" />
+				<property name="app_name" value="${string::substring(app_lebel_app, 0,
+					string::get-length(app_lebel_app)-string::get-length(app_lebel_vd)-1)}" />
+				<property name="vd_app_name" value="${app_lebel_vd}" />
+				
+				<if test="${string::contains(vd_app_name,'\')}">
+					<property name="vd_app_name" value="${string::substring(app_lebel_vd, string::last-index-of(app_lebel_vd,'\')+1, string::get-length(app_lebel_vd)-string::last-index-of(app_lebel_vd,'\')-1)}" />
+				</if>
+				
+				<exec program="c:\windows\System32\InetSrv\appcmd.exe" verbose="true" failonerror="false" >
+					<arg value="add vdir /app.name:&quot;${iis.website}/${app_name}&quot; /path:&quot;/${vd_app_name}&quot; /physicalPath:&quot;${iis.contentdir}\${app_lebel_vd}&quot;"/>
+				</exec>
+			</do> 
+		</foreach>
+	</target>
+	<!-- End: Web setup -->
+	
+	<!--Start: Rollback  Task-->
+	
+	<target name="unzip_prepared_appdeploy_exe">
+		<property name="last.executed.target" value="Un-zipped and prepared deployable"/>
+		<property name="project.type" value="${project.type} - Rollback"/>
+		<property name="svn.branch.merge" value=""/>
+		<property name="svn.revision.to" value=""/>
+		<property name="svn.branch.revision.from" value=""/>
+		<property name="svn.branch.revision.to" value=""/>		
+		<choose>
+			<when test="${file::exists(rollback.path)}">
+				<echo message="Given roll back zip file exist at:  ${path::get-full-path(rollback.path)}" />
+				<call target="clean_appdeploy"/>
+				<unzip zipfile="${rollback.path}" todir="${temp.appdeploy.dir}" overwrite="true"/>			
+				<foreach item="Folder" in="${temp.appdeploy.dir}" property="foldername">
+					<property name="app_name" if="${string::contains(foldername,'\')}" value="${string::substring(foldername, string::last-index-of(foldername,'\')+1, string::get-length(foldername)-string::last-index-of(foldername,'\')-1)}" />
+					<property name="deployale.project.name" value="${deployale.project.name}:${app_name}"/>
+				</foreach>
+			</when>
+			<otherwise>
+				<fail message="Given roll back zip file does not exist at:  ${path::get-full-path(rollback.path)}" />
+			</otherwise>
+		</choose>
+	</target>
+	<target name="unzip_prepared_appdeploy">
+		<property name="last.executed.target" value="Un-zipped and prepared deployable"/>
+		<property name="project.type" value="${project.type} - Rollback"/>
+		<property name="svn.branch.merge" value=""/>
+		<property name="svn.revision.to" value=""/>
+		<property name="svn.branch.revision.from" value=""/>
+		<property name="svn.branch.revision.to" value=""/>		
+		<choose>
+			<when test="${file::exists(rollback.path)}">
+				<echo message="Given roll back zip file exist at:  ${path::get-full-path(rollback.path)}" />
+				<call target="clean_appdeploy"/>
+				<unzip zipfile="${rollback.path}" todir="${temp.appdeploy.dir}" overwrite="true"/>			
+				<copy todir="${deploy.dir}" overwrite="true">
+					<fileset basedir="${temp.appdeploy.dir}">
+						<exclude name="**/*.tlb"/>
+						<include name="**/*.*"/>
+					</fileset>
+				</copy>
+				<foreach item="Folder" in="${temp.appdeploy.dir}" property="foldername">
+					<property name="app_name" if="${string::contains(foldername,'\')}" value="${string::substring(foldername, string::last-index-of(foldername,'\')+1, string::get-length(foldername)-string::last-index-of(foldername,'\')-1)}" />
+					<property name="deployale.project.name" value="${deployale.project.name}:${app_name}"/>
+				</foreach>
+			</when>
+			<otherwise>
+				<fail message="Given roll back zip file does not exist at:  ${path::get-full-path(rollback.path)}" />
+			</otherwise>
+		</choose>
+	</target>
+	
+	<target name="unzip_prepared_config_appdeploy">
+		<property name="config.rollback"	value="1"/>
+		<property name="last.executed.target" value="Un-zipped and prepared deployable"/>
+		<property name="project.type" value="${project.type} - Rollback"/>
+		<property name="svn.branch.merge" value=""/>
+		<property name="svn.revision.to" value=""/>
+		<property name="svn.branch.revision.from" value=""/>
+		<property name="svn.branch.revision.to" value=""/>		
+		<choose>
+			<when test="${file::exists(rollback.path)}">
+				<echo message="Given roll back zip file exist at:  ${path::get-full-path(rollback.path)}" />
+				<call target="clean_appdeploy"/>
+				<unzip zipfile="${rollback.path}" todir="${temp.appdeploy.dir}" overwrite="true"/>			
+			</when>
+			<otherwise>
+				<fail message="Given roll back zip file does not exist at:  ${path::get-full-path(rollback.path)}" />
+			</otherwise>
+		</choose>
+	</target>
+	<!-- End: Rollback Task-->	
+	<target name="set_environment_variable">
+		<property name="last.executed.target" value="Environment variable settings"/>
+		<property name="project.type"	value="Environment Variable"/>
+		<foreach item="String" in="${environment.variables}" delim="|" property="environment_var">
+			<do> 
+				<echo message="Environment variable: ${environment_var}" />
+				
+				<property name="env_var_val" value="${string::substring(environment_var,
+					string::last-index-of(environment_var,'~')+1,
+					string::get-length(environment_var)-string::last-index-of(environment_var,'~')-1)}" />
+				<property name="env_var" value="${string::substring(environment_var, 0,
+					string::get-length(environment_var)-string::get-length(env_var_val)-1)}" />
+				
+				 <exec program="..\..\NANT v0.92\Thirdparty Tools\Batch\set_env_var.cmd" >
+				  <arg value="${env_var}" />
+				  <arg value="${env_var_val}" />
+				</exec>
+			</do> 
+		</foreach>	
+		<!-- IIS reset is required after seetting environment variable set -->
+		<call target="stop_iis"/>
+		<call target="start_iis"/>		
+	</target>	
+	
+	<!-- Start: Mail Notification Part -->
+	
+	<target name="success_target">
+		<property name="last.executed.target" value=""/>
+		<property name="deploy_status" value="Successful"/>
+		<call target="releasenotes" />
+		<if test="${mail.send.required == 'true'}">
+			<property name="mail_subject" value="NANT Auto Deployment  at ${env} : Successfully done for : ${project.type}"/>
+			<property name="mail_body" value="NANT Auto Deployment Successfully completed for  : ${project.type} "/>
+			<call target="send_notification"/>
+		</if>
+	</target>
+	
+	<target name="faliur_target">
+		<call target="releasenotes" />
+		<if test="${mail.send.required == 'true'}">
+			<property name="mail_subject" value="NANT Auto Deployment at ${env} : Failed for : ${project.type}"/>
+			<property name="mail_body" 
+			value="NANT Auto Deployment failed for : ${project.type} . Failed due to &quot;${last.executed.target}&quot; "/>
+			<call target="send_notification"/>
+		</if>
+	</target>
+	
+	<target name="send_notification">
+		<mail 
+			from="${email.from}" 
+			tolist="${email.to.list}" 
+			cclist="${email.cc.list}" 
+			bcclist="${email.bcc.list}" 
+			subject="${mail_subject}" 
+			message="${mail_body}"
+			mailhost="${smtp.host}"
+			mailport="${smtp.port}"
+			ssl="${ssl}"			
+			>
+			<!-- <attachments basedir="">
+				
+			</attachments> -->
+		</mail>
+	</target>
+	
+	<target name="releasenotes">		
+		<if test="${not file::exists(release.note)}">
+			<echo file="${release.note}" append="true">
+				<![CDATA[
+					<table style="border:1px solid black;border-collapse:collapse;">
+					<tr>
+						<th style="border:1px solid black;">Project Type</th>
+						<th style="border:1px solid black;">Date</th>						
+						<th style="border:1px solid black;">Status</th>
+						<th style="border:1px solid black;">Merge</th>
+						<th style="border:1px solid black;">Trunk Revision To</th>
+						<th style="border:1px solid black;">Branch Revision From</th>
+						<th style="border:1px solid black;">Branch Revision To</th>
+						<th style="border:1px solid black;">Failiure Target</th>
+						<th style="border:1px solid black;">Backup File</th>
+						<th style="border:1px solid black;">Log File</th>
+					</tr>
+				]]>
+			</echo>
+		</if>	
+		<property name="zip_file" value=""/>
+		<if test="${string::contains(backup.zipfile,'.zip')}">
+			<property name="zip_file" value="${path::get-full-path(backup.zipfile)}"/>
+		</if>	
+		<echo file="${release.note}" append="true">
+			<![CDATA[
+				<tr>
+					<th style="border:1px solid black;">${project.type}</th>
+					<th style="border:1px solid black;">${build.startdate}</th>					
+					<th style="border:1px solid black;">${deploy_status}</th>
+					<th style="border:1px solid black;">${svn.branch.merge}</th>
+					<th style="border:1px solid black;">${svn.revision.to}</th>
+					<th style="border:1px solid black;">${svn.branch.revision.from}</th>
+					<th style="border:1px solid black;">${svn.branch.revision.to}</th>					
+					<th style="border:1px solid black;">${last.executed.target}</th>
+					<th style="border:1px solid black;">${zip_file}</th>					
+					<th style="border:1px solid black;">${path::get-full-path('..\..\logs')}\${nant.log_file}</th>
+				</tr>
+			]]>
+		</echo>
+	</target>
+
+	
+	<!-- End: Mail Notification Part -->
+	
+	<!--Start: Config File Task-->
+	
+	<target name="copy_config_deployable">
+		<if test="${config.rollback == '0'}">
+			<call target="clean_appdeploy"/>	
+			<copy todir="${temp.appdeploy.dir}" overwrite="true">
+				<fileset basedir="${temp.project.source.dir}\${deployment.environment}">
+					<exclude name=".svn" />
+					<exclude name="_svn" /> 
+					<include name="**/*.*"/>
+				</fileset>
+			</copy>
+		</if>
+		<mkdir dir="${application.config.dir}" if="${not directory::exists(application.config.dir)}" />
+		<foreach item="File" property="filename">  
+			<in>
+				<items basedir="${temp.appdeploy.dir}" >
+					<exclude name=".svn" />
+					<exclude name="_svn" />  
+					<include name="**/*.*"/>
+				</items>
+			</in>
+			<do>
+				<property name="file_path" value="${directory::get-parent-directory(filename)}" />
+				<property name="deploy_file_path" value="${string::replace(file_path,temp.appdeploy.dir, root.dir )}" />
+				<copy file="${filename}" todir="${deploy_file_path}" if="${directory::exists(deploy_file_path)}" overwrite="true"/>
+			</do>  
+		</foreach>
+	</target>
+	
+	<target name="copy_sql_deployable">
+		<call target="clean_appdeploy"/>
+		<choose>
+			<!-- Check for particular JOB -->
+			<when test="${string::get-length(specific.project) > 0}">
+				<foreach item="String" in="${specific.project}" delim="," property="job_file">
+					<do>
+						<echo message="Specific JOB: ${job_file}"/>
+						<copy todir="${temp.appdeploy.dir}"> 
+							<fileset basedir="${temp.project.source.dir}">
+								<include name="**/${job_file}.sql" />
+							</fileset>
+						</copy>
+					</do> 
+				</foreach>
+			</when>
+			<!-- For all projects folder to folder copy only -->
+			<otherwise>
+				<copy todir="${temp.appdeploy.dir}" overwrite="true">
+					<fileset basedir="${temp.project.source.dir}">				
+						<include name="**/*.sql" />
+					</fileset>
+				</copy>
+			</otherwise>
+		</choose>
+	</target>
+	
+	<target name="copy_job_sql_deployable">
+		<call target="clean_appdeploy"/>
+		<choose>
+			<!-- Check for particular JOB -->
+			<when test="${string::get-length(specific.project) > 0}">
+				<foreach item="String" in="${specific.project}" delim="," property="job_file">
+					<do>
+						<echo message="Specific JOB: ${job_file}"/>
+						<copy todir="${temp.appdeploy.dir}"> 
+							<fileset basedir="${temp.project.source.dir}\${job.sql.connection.string.sub.path}">
+								<include name="**/${job_file}.sql" />
+							</fileset>
+						</copy>
+					</do> 
+				</foreach>
+			</when>
+			<!-- For all projects folder to folder copy only -->
+			<otherwise>
+				<copy todir="${temp.appdeploy.dir}" overwrite="true">
+					<fileset basedir="${temp.project.source.dir}\${job.sql.connection.string.sub.path}">				
+						<include name="**/*.sql" />
+					</fileset>
+				</copy>
+			</otherwise>
+		</choose>
+		<!-- Proxy sql -->
+		<property name="proxy.sql.source.path" value="${temp.project.source.dir}\Alter_Proxy"/>		
+		<if test="${directory::exists(proxy.sql.source.path)}">
+			<if test="${directory::exists(temp.appdeploy.proxy.sql.dir)}">			
+				<delete dir="${temp.appdeploy.proxy.sql.dir}" />
+			</if>
+			<copy todir="${temp.appdeploy.proxy.sql.dir}" overwrite="true">
+				<fileset basedir="${temp.project.source.dir}\Alter_Proxy">				
+					<include name="**/*.sql" />
+				</fileset>
+			</copy>			
+		</if>
+	</target>
+	
+	<target name="job_sql_deployment">
+		<property name="last.executed.target" value="Job SQL Statement Execution"/>
+		<foreach item="File" property="sql_filename">
+			<in>
+				<items basedir="${temp.appdeploy.dir}">
+					<include name="**/*.sql" />
+				</items>
+			</in>
+			<do>				
+				<if test="${string::get-length(connection.string) > 0}">
+					<!-- Execute SQL Statement -->
+				<property name="sql.log.path" value="..\..\logs\Job_SQL_Logs" />
+				<tstamp property="log.date.time" pattern="yyyy-MM-dd_HH-mm-ss"/>
+				<mkdir dir="${sql.log.path}" if="${not directory::exists(sql.log.path)}" />
+				<property name="sql.file.log" value="${sql.log.path}\${path::get-file-name-without-extension(sql_filename)}_${log.date.time}.log" />
+					<exec program="sqlcmd" >
+						<arg value="${connection.string} -b -i &quot;${sql_filename}&quot; -o &quot;${sql.file.log}&quot;"/>
+					</exec>
+				</if>			
+			</do>
+		</foreach>
+	</target>
+	
+	<target name="sql_deployment">
+		<property name="last.executed.target" value="SQL Statement Execution"/>
+		<foreach item="File" property="sql_filename">
+			<in>
+				<items basedir="${temp.appdeploy.dir}">
+					<include name="**/*.sql" />
+				</items>
+			</in>
+			<do>
+				<property name="connection.ID" value=""/>				
+				<foreach item="Line" in="${sql_filename}" property="con_string">
+					<if test="${string::starts-with(con_string,'--@@DBConnectionID:')}">
+						<property name="connection.ID" value="${string::substring(con_string, 19 ,string::get-length(con_string)-19)}"/>
+					</if>					
+				</foreach>
+				<choose>
+					<!-- Connection ID available at sql file -->
+					<when test="${string::get-length(connection.ID) > 0}">
+						<!-- pick connection string -->
+						<property   name="sql.connection.output.file"  value="${temp.project.source.dir}\sql_connection.txt" />
+						<exec program="..\..\NANT v0.92\Thirdparty Tools\Password Decryptor\Encrypt_Decrypt.exe" output="${sql.connection.output.file}">
+							<arg value="S" />
+							<arg value="${connection.ID}" />
+							<arg value="${sql.connection.string.path}" />
+						</exec>
+						<loadfile  file="${sql.connection.output.file}"  property="connection.string" />
+						<delete file="${sql.connection.output.file}" />
+					</when>					
+					<otherwise>
+						<!-- Connection ID not available at sql file. It will fetch the connection string from default location at .include file -->
+						<property name="connection.string" value="${sql.connection.string.path}"/>
+					</otherwise>
+				</choose>
+				<!-- Execute SQL Statement -->
+				<property name="sql.log.path" value="..\..\logs\SQL_Logs" />
+				<tstamp property="log.date.time" pattern="yyyy-MM-dd_HH-mm-ss"/>
+				<mkdir dir="${sql.log.path}" if="${not directory::exists(sql.log.path)}" />
+				<property name="sql.file.log" value="${sql.log.path}\${path::get-file-name-without-extension(sql_filename)}_${log.date.time}.log" />
+				<if test="${string::get-length(connection.string) > 0}">					
+					<exec program="sqlcmd" >
+						<arg value="${string::trim(connection.string)} -b -i &quot;${sql_filename}&quot; -o &quot;${sql.file.log}&quot;"/>
+					</exec>
+				</if>			
+			</do>
+		</foreach>
+	</target>
+	
+	<!-- SSRS Deployment -->
+	<target name="copy_to_build_dir">
+		<if test="${property::exists('temp.build.output.dir')}">
+			<delete dir="${temp.build.output.dir}" />
+		</if>
+		<copy todir="${temp.build.output.dir}" overwrite="true">
+			<fileset basedir="${temp.project.source.dir}">
+				<include name="**/*.rdl"/>
+				<include name="**/*.rds"/>	
+			</fileset>
+		</copy>							
+	</target>
+	
+	<!-- Task for taking the full backup if specific project is not required-->
+	<target name="ssrs_backup">
+		<call target="clean_appdeploy"/>
+		<zip zipfile="${temp.ssrs.backup.dir}/backup_${string::to-lower(project.type)}_${build.lastdate}.zip">
+			<fileset basedir="${temp.ssrs.backup.dir}" prefix="">
+				<exclude name="**/*.txt"/>
+				<exclude name="**/*.zip"/>
+				<include name="*" />
+				<include name="**/*" />
+			</fileset>
+		</zip>		
+	</target>
+	
+	<target name="prepare_appdeployable_ssrs">
+		<choose>
+			<!-- Check for particular project from configuration file -->
+			<when test="${string::get-length(specific.project) > 0}">
+				<call target="prepare_appdeployable_partial_ssrs"/>
+			</when>
+			<!-- For all projects folder to folder copy only -->
+			<otherwise>
+				<call target="prepare_appdeployable_full_ssrs"/>
+			</otherwise>
+		</choose>
+	</target>
+	
+	<target name="prepare_appdeployable_full_ssrs">
+		<copy todir="${temp.ssrs.backup.dir}" overwrite="true">
+			<fileset basedir="${temp.build.output.dir}">
+				<exclude name=".svn" />
+				<exclude name="_svn" />  
+				<include name="**/*.*"/>
+			</fileset>
+		</copy>
+		<!-- It cleans the App folder before moving all the folders from backup folder to App folder -->
+		<call target="clean_appdeploy"/>
+		<call target="ssrs_backup"/>
+		<!-- Moving all the folders from backup folder to App folder -->
+		<move todir="${temp.appdeploy.dir}" overwrite="true">
+			<fileset basedir="${temp.ssrs.backup.dir}">
+				<exclude name=".svn" />
+				<exclude name="_svn" />
+				<exclude name="*.zip"/>
+				<include name="**/*.*"/>
+			</fileset>
+		</move>		
+		<delete>
+			<fileset basedir="${temp.ssrs.backup.dir}">
+				<include name="**\*" />
+				<exclude name="*.zip"/>
+			</fileset>
+		</delete>			
+	</target>		
+		
+	<target name="prepare_appdeployable_partial_ssrs">			
+		<!-- Copying all the contents from Build folder to Backup folder -->
+		<foreach item="String" in="${ssrs.specific.project}" delim="," property="project">
+			<do>
+				<foreach item="File" property="File_Name">
+					<in>
+					<items basedir="${temp.build.output.dir}">
+						<include name="**/*.rds" />
+						<include name="**/*.rdl" />
+					</items>
+				</in>
+					<do>
+					<property name="only_filename" value="${string::substring(File_Name, string::last-index-of(File_Name, '\') + 1, string::get-length(File_Name) - string::last-index-of(File_Name, '\') - 1)}" />
+					<if test="${only_filename==project}"> 
+							<copy todir="${temp.ssrs.backup.dir}" overwrite="true">
+								<fileset basedir="${temp.build.output.dir}">
+									<include name="**/${only_filename}"/>
+								</fileset>
+							</copy>	
+					</if>
+					</do>
+				</foreach>
+			</do> 
+		</foreach>		
+		<!-- Moving all the folders from backup folder to App folder -->
+		<move todir="${temp.appdeploy.dir}" overwrite="true">
+			<fileset basedir="${temp.ssrs.backup.dir}">
+					<exclude name=".svn" />
+					<exclude name="_svn" /> 
+					<exclude name="*.zip"/>
+					<include name="**/*.*"/>
+			</fileset>
+		</move>
+		<delete>
+			<fileset basedir="${temp.ssrs.backup.dir}">
+				<include name="**\*" />
+				<exclude name="*.zip"/>
+			</fileset>
+		</delete>
+	</target>		
+		
+	<!-- This target is used for creating folders in the report server-->
+	<target name="ssrs_create_folder">
+		<foreach item="String" in="${ssrs.create.folder}" delim="|" property="Folder_Strg">
+			<do> 
+				<property name="parent_path" value="/" />
+				<property name="folder_name" value="${Folder_Strg}" />
+				<if test="${string::contains(Folder_Strg, '/')}">
+					<property name="parent_path" value="/${string::substring(Folder_Strg,0,string::last-index-of(Folder_Strg,'/'))}" />
+					<property name="folder_name" value="${string::substring(Folder_Strg,string::last-index-of(Folder_Strg,'/')+1, string::get-length(Folder_Strg)-string::last-index-of(Folder_Strg,'/')-1)}" />
+				</if>
+				
+				<!--This will create the new directories in the report server-->
+				<!--For deployment it calls ssrs_create_folder.cmd which calls the rs.exe and passing create_folder.rss & other details like url of report server, parent directory, directory name. -->											
+				<exec program="..\..\NANT v0.92\Thirdparty Tools\Batch\SSRS\ssrs_create_folder.cmd" failonerror="false">
+					<arg value="create_folder.rss" />
+					<arg value="${ssrs.url}" />
+					<arg value="${parent_path}" />
+					<arg value="${folder_name}" />
+				</exec>
+			</do>
+		</foreach>
+	</target> 		
+
+	<!--It deploys all the .rdl files in the report server.-->
+	<target name="ssrs_rdl_deploy" >
+	<!--Code Change Start Restructure of SSRS Report Incident:34842 Date:03282016 -->
+	<!--Code changed to get rid of dependency from SVn folder structure of SSRS reports as well as from the Folder Path tag in ssrs config file
+	 It will fetch each rdl files and also the source and destination location of the rdl file and will deploy the rdl using the file deploy_rdl_file.rss-->
+		<!-- <foreach item="Folder" in="${temp.appdeploy.dir}" property="FolderPath"> -->
+			<!-- <do> -->
+				<!--Extracting Folder name from FolderPath -->
+				<!-- <property name="Folder_Name" value="${string::substring(FolderPath, string::last-index-of(FolderPath, '\') + 1, string::get-length(FolderPath) - string::last-index-of(FolderPath, '\') - 1)}" /> -->
+				<!-- <property name="rdl.deploy_location" value=""/> -->
+						
+				<!-- <xmlpeek -->
+					<!-- file="..\Server Configurations\${deployment.environment}\ssrs_config.xml" -->
+					<!-- xpath="/x:File_path_config/x:folder_map/x:folder[@name ='${Folder_Name}']/@mapping" -->
+					<!-- property="folder.mapping.path"> -->
+					<!-- <namespaces> -->
+					<!-- <namespace prefix="x" uri="http://tempuri.org/po.xsd" /> -->
+					<!-- </namespaces> -->
+				<!-- </xmlpeek> -->
+				<!--For deployment it calls ssrs_rdl_deploy.cmd which calls the rs.exe and passing deploy_rdl_file.rss & other details like url of report server, parent directory, directory name. -->
+				<!-- <exec program="..\..\NANT v0.92\Thirdparty Tools\Batch\SSRS\ssrs_rdl_deploy.cmd" > -->
+					<!-- <arg value="deploy_rdl_file.rss" /> -->
+					<!-- <arg value="${ssrs.url}" /> -->
+					<!-- <arg value="${FolderPath}" /> -->
+					<!-- <arg value="${folder.mapping.path}" /> -->	
+				<!-- </exec> -->
+			<!-- </do> -->
+		<!-- </foreach> -->
+		<foreach item="File"  property="filename">
+			<in>
+				<items basedir="${temp.appdeploy.dir}">
+					<include name="**/*.rdl" />
+				</items>
+			</in>
+			<do>
+				<property name="only_filename" value="${path::get-file-name-without-extension(filename)}"/>	
+				<xmlpeek
+					file="..\Server Configurations\${deployment.environment}\ssrs_config.xml"
+					xpath="/x:File_path_config/x:rdl_path/x:rdl[@name = '${only_filename}']/@location"
+					property="folder.source.location">
+					<namespaces>
+					<namespace prefix="x" uri="http://tempuri.org/po.xsd" />
+					</namespaces>
+				</xmlpeek>
+				<xmlpeek
+					file="..\Server Configurations\${deployment.environment}\ssrs_config.xml"
+					xpath="/x:File_path_config/x:rdl_path/x:rdl[@name = '${only_filename}']/@deploy_location"
+					property="folder.mapping.location">
+					<namespaces>
+					<namespace prefix="x" uri="http://tempuri.org/po.xsd" />
+					</namespaces>
+				</xmlpeek>
+				<!--For deployment it calls ssrs_rdl_deploy.cmd which calls the rs.exe and passing deploy_rdl_file.rss & other details like url of report server, parent directory, directory name. -->
+				<exec program="..\..\NANT v0.92\Thirdparty Tools\Batch\SSRS\ssrs_rdl_deploy.cmd" >
+					<arg value="deploy_rdl_file.rss" />
+					<arg value="${ssrs.url}" />
+					<arg value="${only_filename}" />
+					<arg value="${temp.appdeploy.dir}\${folder.source.location}" />
+					<arg value="${folder.mapping.location}" />
+				</exec>
+			</do>
+		</foreach>
+	<!--Code Change End Restructure of SSRS Report Incident:34842 Date:03282016 -->
+	</target>
+	
+	<target name="ssrs_rds_deploy" >		
+		<foreach item="File" property="filename">
+			<in>
+				<items basedir="${temp.appdeploy.dir}">
+					<include name="**/*.rds" />
+				</items>
+			</in>
+			<do>
+				<!--It searches for .rds extension file. If it founds the .rds file then it deploys the datasource(.rds)
+				files in the report server.-->
+				<!--For deployment it calls ssrs_rds_deploy.cmd which calls the rs.exe and passing deploy_rds_file.rss & 
+				other details like url of report server, report file path, report filew name without extension and directory name. -->
+				<property name="only_filename" value="${path::get-file-name-without-extension(filename)}"/>
+				<xmlpeek
+					file="..\Server Configurations\${deployment.environment}\ssrs_config.xml"
+					xpath="/x:File_path_config/x:rds_path/x:rds[@name ='${only_filename}']/@path"
+					property="rds.path">
+					<namespaces>
+					<namespace prefix="x" uri="http://tempuri.org/po.xsd" />
+					</namespaces>
+				</xmlpeek>				
+				<xmlpeek
+					file="..\Server Configurations\${deployment.environment}\ssrs_config.xml"
+					xpath="/x:File_path_config/x:rds_path/x:rds[@name = '${only_filename}']/@conn"
+					property="rds.conn">
+					<namespaces>
+					<namespace prefix="x" uri="http://tempuri.org/po.xsd" />
+					</namespaces>
+				</xmlpeek>
+				<foreach item="String" in="${rds.path}" delim="," property="rds.deploy.path">
+					<do>
+						<exec program="..\..\NANT v0.92\Thirdparty Tools\Batch\SSRS\ssrs_rds_deploy.cmd" >
+							<arg value="deploy_rds_file.rss" />
+							<arg value="${ssrs.url}" />
+							<arg value="SQL" />
+							<arg value="${rds.conn}" />
+							<arg value="${only_filename}" />
+							<arg value="${rds.deploy.path}" />
+							<arg value="False" />
+							<arg value="${ssrs.user}" />
+							<arg value="${ssrs.decrypt.password}" />
+						</exec>
+					</do>
+				</foreach>
+			</do>
+		</foreach>
+	</target>
+
+	<!--This part is used for mapping the report files(.rdl) and datasource file(.rds)-->
+	<target name="mapping_ssrs">
+		<foreach item="File"  property="filename">
+			<in>
+				<items basedir="${temp.appdeploy.dir}">
+					<include name="**/*.rdl" />
+				</items>
+			</in>
+			<do>
+				<property name="only_filename" value="${path::get-file-name-without-extension(filename)}"/>				
+				<xmlpeek
+					file="..\Server Configurations\${deployment.environment}\ssrs_config.xml"
+					xpath="/x:File_path_config/x:rdl_path/x:rdl[@name = '${only_filename}']/@rds_file"
+					property="rds_filename">
+					<namespaces>
+					<namespace prefix="x" uri="http://tempuri.org/po.xsd" />
+					</namespaces>
+				</xmlpeek>				
+				<xmlpeek
+					file="..\Server Configurations\${deployment.environment}\ssrs_config.xml"
+					xpath="/x:File_path_config/x:rdl_path/x:rdl[@name = '${only_filename}']/@deploy_location"
+					property="rdl.deploy_location">
+					<namespaces>
+					<namespace prefix="x" uri="http://tempuri.org/po.xsd" />
+					</namespaces>
+				</xmlpeek>				
+				<choose>
+				<!--Code Change Start Restructure of SSRS Report Incident:34842 Date:03282016 -->
+				<!--Code changed to get the Reports deployable location (Default/Folder specific) in the Report manager based on the ssrs config value for each rdl file.-->
+					 <!-- <when test="${rds_filename=='Media'}"> -->
+						<!-- <xmlpeek -->
+						<!-- file="..\Server Configurations\${deployment.environment}\ssrs_config.xml" -->
+						<!-- xpath="/x:File_path_config/x:rds_path/x:rds[@name = '${rds_filename}']/@path" -->
+						<!-- property="rds.path"> -->
+						<!-- <namespaces> -->
+						<!-- <namespace prefix="x" uri="http://tempuri.org/po.xsd" /> -->
+						<!-- </namespaces> -->
+						<!-- </xmlpeek> -->
+					<!-- </when> -->
+					<!-- <otherwise> -->
+						<!-- <property name="rds.path" value="/${rdl.deploy_location}"/> -->
+					<!-- </otherwise> -->	
+					<when test="${rdl.deploy_location==''}">
+						<property name="deploy_location_rdl" value="/"/>
+					</when>
+					<otherwise>
+						<property name="deploy_location_rdl" value="/${rdl.deploy_location}/"/>
+					</otherwise>
+				<!--Code Change End Restructure of SSRS Report Incident:34842 Date:03282016 -->
+				</choose>				
+				<foreach item="String" in="${rds_filename}" delim="," property="rds.file.name">
+					<do>
+					<!--Code Change Start Restructure of SSRS Report Incident:34842 Date:03282016 -->
+					<!--Code changed to get the rds file deploy location from config file-->
+					<xmlpeek
+						file="..\Server Configurations\${deployment.environment}\ssrs_config.xml"
+						xpath="/x:File_path_config/x:rds_path/x:rds[@name = '${rds.file.name}']/@path"
+						property="rds.path">
+						<namespaces>
+						<namespace prefix="x" uri="http://tempuri.org/po.xsd" />
+						</namespaces>
+					</xmlpeek>
+					<!--Code Change End Restructure of SSRS Report Incident:34842 Date:03282016 -->
+						<!--Executing the batch file(ssrs_map.cmd) which is doing mapping of deployed files in the server.-->
+						<!--It is using rs.exe which uses mapping.rss (vb.net file as a parameter) and other details like datasource path, datasource name, url of report server & report file path as parameters-->
+						<exec program="..\..\NANT v0.92\Thirdparty Tools\Batch\SSRS\ssrs_map.cmd" >
+							<arg value="mapping.rss" />
+							<arg value="${ssrs.url}" />
+							<arg value="${rds.path}/${rds.file.name}" />
+							<arg value="${rds.file.name}" />
+							<!--Code Change Start Restructure of SSRS Report Incident:34842 Date:03282016 -->
+							<!-- <arg value="/${rdl.deploy_location}/${only_filename}" /> -->
+							<arg value="${deploy_location_rdl}${only_filename}" />
+							<!--Code Change End Restructure of SSRS Report Incident:34842 Date:03282016 -->
+						</exec>
+					</do>
+				</foreach>
+			</do>
+		</foreach>
+	</target>
+
+	<!--End: Config File Task-->
+	
+	<!-- SSIS Target -->
+	
+	<!-- Initialization section of SSIS -->
+	<target name="init_ssis">
+		<property name="project.type"		value="SSIS"/>
+		<property name="svn.repos"		value="${ssis.repos}"/> 
+		<property name="svn.branch.merge"		value="${ssis.merge.with.branch}"/> 
+		<property name="svn.branch.url"		value="${ssis.merge.branch.repos}"/>		 
+		<property name="svn.branch.revision.from"		value="${ssis.merge.branch.revision.from}"/>
+		<property name="svn.branch.revision.to"		value="${ssis.merge.branch.revision.to}"/>
+		<property name="svn.revision.to"		value="${ssis.revision.to}"/>
+		<property name="specific.project"		value="${ssis.specific.project}"/>
+		<property name="temp.project.source.dir" value="${temp.sourcecode.dir}\${project.type}" />
+		<property name="temp.build.output.dir"	value="${temp.buildoutput.dir}\${project.type}"/>
+		<property name="temp.appdeploy.dir"	value="${temp.appdeploy.base.dir}\${project.type}"/>
+		<property name="ssis.create.proc"		value="${ssis.sql.create.proc}"/>
+		<property name="ssis.drop.proc"		value="${ssis.sql.drop.proc}"/>
+		<property name="ssis.deploy.env"		value="${deployment.environment}"/>	
+		<property name="temp.bids.backup.dir" value="${ssis.backup.path}\${project.type}"/>
+		<property name="sql.conn"		value="${ssis.sql.conn}"/>
+		<property name="ssis.instance"		value="${ssis.server.name}"/>
+		<property name="ssis.deploy.proc"		value="${ssis.deploy.proc.name}"/>		
+		<property name="rollback.path"		value="${backup.dir}\${project.type}\${rollback.file}"/>
+	</target>
+	
+	<!-- Building the SSIS Packages and generating ispac file -->
+	<target name="compile_ssis">
+		<property name="last.executed.target" value="Compile SSIS"/>
+		<foreach item="File" property="ssis_project">  
+			<in>  
+				<items basedir="${temp.project.source.dir}\Packages" > 
+						<include name="**/*.dtproj"/>
+				</items>  
+			</in>  
+			<do>				
+				<property name="app_name" if="${string::contains(ssis_project,'\')}" 
+					value="${string::substring(ssis_project, string::last-index-of(ssis_project,'\')+1, string::get-length(ssis_project)-string::last-index-of(ssis_project,'\')-8)}" />
+				<echo message="Compiling SSIS Project: ${app_name}"/>
+				<!-- Set SSIS project path-->				
+				<xmlpoke file="..\..\NANT v0.92\Thirdparty Tools\SSIS_Compile\Temp Msbuild Script\msbuild_ssis.xml" 
+					xpath="/nhc:Project/nhc:Target/nhc:PropertyGroup/nhc:SSISProjPath" value="${ssis_project}">
+					<namespaces>
+						<namespace prefix="nhc" uri="http://schemas.microsoft.com/developer/msbuild/2003" />
+					</namespaces>
+				</xmlpoke>
+				<!-- Set output Dir -->
+				<property   name="ssis.output.dir"  value="${temp.build.output.dir}\Build\${app_name}" />
+				<xmlpoke file="..\..\NANT v0.92\Thirdparty Tools\SSIS_Compile\Temp Msbuild Script\msbuild_ssis.xml" 
+					xpath="/nhc:Project/nhc:Target/nhc:PropertyGroup/nhc:OutDir" value="${ssis.output.dir}">
+					<namespaces>
+						<namespace prefix="nhc" uri="http://schemas.microsoft.com/developer/msbuild/2003" />
+					</namespaces>
+				</xmlpoke>
+			
+				<exec program="C:\Windows\Microsoft.NET\Framework64\v4.0.30319\MSBuild.exe">
+				    <arg value="&quot;..\..\NANT v0.92\Thirdparty Tools\SSIS_Compile\Temp Msbuild Script\msbuild_ssis.xml&quot;" />				  
+				</exec>
+			</do> 
+		</foreach>
+	</target>
+	
+	<!-- Preparing the build folder by keeping ispac and config file under the SSIS Package wise folder -->
+	<target name="prepare_ssis_build_folder">
+		<foreach item="Folder" in="${temp.build.output.dir}\Build" property="foldername">
+		<property name="app_name" if="${string::contains(foldername,'\')}" value="${string::substring(foldername, string::last-index-of(foldername,'\')+1, string::get-length(foldername)-string::last-index-of(foldername,'\')-1)}" />
+		<copy todir="${temp.build.output.dir}/${app_name}">
+			<fileset basedir="${temp.build.output.dir}\Build\${app_name}\bin\Development">
+				<include name="**/*.ispac"/>
+			</fileset>
+		</copy>			
+		</foreach>
+		<delete dir="${temp.build.output.dir}\Build" failonerror="false"/> 
+		<call target="copy_ispacconfig_to_build_folder"/>
+	</target>	
+	
+	<!-- Copying ispac specific configuration file from source code folder in SSIS project in build folder -->
+	<target name="copy_ispacconfig_to_build_folder">
+		<foreach item="Folder" in="${temp.build.output.dir}" property="foldername">
+		<property name="app_name" if="${string::contains(foldername,'\')}" value="${string::substring(foldername, string::last-index-of(foldername,'\')+1, string::get-length(foldername)-string::last-index-of(foldername,'\')-1)}" />
+		<copy todir="${temp.build.output.dir}/${app_name}">  
+			<fileset basedir="${temp.project.source.dir}\Configuration\Code_Base">
+				<include name="Config_${app_name}.sql"/>
+			</fileset>
+		</copy>			
+		</foreach>	
+	</target>
+	
+	<!-- Deploying SSIS Packages  -->
+	<target name="deploy_ispac">
+	<!-- Step - 1: Call the SQL batch file to create the procedure.
+		 Step - 2: Deployment of ISPAC involves 3 steps
+				 (a). Executes the procedure to create the ISPAC folder.
+				 (b). Calls the bat file to deploy the ISPAC
+				 (c). Executes the Config file of ISPAC	
+		 Step - 3: Call the SQL batch file to drop the procedure. -->
+		
+		<!-- Calling the SQL batch file to create the procedure -->
+		<property name="sql_filename" value="${ssis.create.proc}" />
+		<call target="ssis_sql_cmd"/>
+				
+		<!-- Deployment of ISPAC in loop -->
+		<foreach item="Folder" in="${temp.appdeploy.dir}" property="foldername">
+			<property name="app_name" if="${string::contains(foldername,'\')}" value="${string::substring(foldername, string::last-index-of(foldername,'\')+1, string::get-length(foldername)-string::last-index-of(foldername,'\')-1)}" />
+					<foreach item="File" property="filename">  
+						<in>
+							<items basedir="${temp.appdeploy.dir}\${app_name}" >  
+								<include name="**/*.ispac"/>
+							</items>
+						</in>
+						<do>
+							<!-- Executing the procedure to create ISPAC specific folder -->	
+							<property name="ssis.ispac.name" value="${app_name}" />
+							<call target="sql_deploy_proc"/>
+							<!-- Executing bat file to deploy ispac -->	
+							<call target="create_ispac_folder"/>							
+							<!-- Executing Config file -->	
+							<property name="sql_filename" value="${temp.appdeploy.dir}\${app_name}\Config_${app_name}.sql" />
+							<call target="ssis_sql_cmd"/>
+						</do>  
+					</foreach>
+		</foreach> 		
+		
+		<!-- Calling the SQL batch file to drop the procedure -->
+		<property name="sql_filename" value="${ssis.sql.drop.proc}" /> 
+		<call target="ssis_sql_cmd"/>  
+			
+	</target>
+
+	<!-- Stored Proc execution section required for deploying SSIS Packages -->
+	<target name="sql_deploy_proc">
+		<!-- This target is used to deploy the procedure -->
+		<tstamp property="build.startdate" pattern="yyyyMMdd_HHmmss" verbose="true" />
+		<echo message="Sql_deploy_started"/>
+		<sql
+			connstring="${sql.conn}"
+			transaction="true"
+			delimiter=";"
+			delimstyle="Normal"
+			print="true"
+			output=""
+		>
+		exec Proc_Auto_Deploy '${ssis.ispac.name}', '${ssis.instance}';
+		</sql>
+	</target>
+	
+	<!-- Bat file called to deploy the ISPAC -->
+	<target name="create_ispac_folder">
+		<exec program="..\..\NANT v0.92\Thirdparty Tools\Batch\ssis_ispac_deploy.cmd" >
+			<arg value="${temp.appdeploy.dir}\${ssis.ispac.name}\${ssis.ispac.name}.ispac" />
+			<arg value="${ssis.instance}" />
+			<arg value="/SSISDB/${ssis.ispac.name}/${ssis.ispac.name}" />
+		</exec>
+	</target>
+	
+	<!-- Bat file called to deploy the ISPAC -->
+	<target name="ssis_sql_cmd">
+		<property name="connection.string"	value="-D master -S ${ssis.instance}"/>
+		<exec program="sqlcmd" >
+				<arg value="${connection.string} -i &quot;${sql_filename}&quot;"/>
+		</exec>
+	</target>
+	
+	<!-- SSIS Target -->
+	
+	<!-- SSAS Target -->
+	
+	<!-- Initialization section of SSAS -->
+	
+	<target name="init_ssas"> 
+		<tstamp property="build.startdate" pattern="yyyyMMdd_HHmmss" verbose="true" />
+		<property name="svn.repos"		value="${ssas.repos}"/>
+		<property name="svn.branch.merge"		value="${ssas.merge.with.branch}"/> 
+		<property name="svn.branch.url"		value="${ssas.merge.branch.repos}"/>
+		<property name="svn.branch.revision.from"		value="${ssas.merge.branch.revision.from}"/>
+		<property name="svn.branch.revision.to"		value="${ssas.merge.branch.revision.to}"/>
+		<property name="project.type"		value="SSAS"/>
+		<property name="svn.revision.to"		value="${ssas.revision.to}"/>	
+		<property name="specific.project"		value="${ssas.specific.project}"/>
+		<property name="temp.project.source.dir" value="${temp.sourcecode.dir}\${project.type}" />
+		<property name="temp.build.output.dir"	value="${temp.buildoutput.dir}\${project.type}"/>
+		<property name="temp.bids.backup.dir" value="${backup.dir}\${project.type}"/>
+		<property name="temp.appdeploy.dir"	value="${temp.appdeploy.base.dir}\${project.type}"/>
+		<property name="rollback.path"		value="${backup.dir}\${project.type}\${rollback.file}"/>
+	</target>
+	
+	<!-- Moving all the contents from source code folder to build folder -->
+	<target name="move_to_build_dir">
+			<copy todir="${temp.build.output.dir}" overwrite="true"> 
+			<fileset basedir="${temp.project.source.dir}"> 
+					<exclude name="**/*.nant_template"/>
+					<exclude name=".svn" />
+					<exclude name="_svn" />  
+					<include name="**/*.*"/>
+			</fileset>
+		</copy>		
+	</target>
+	
+	<!-- asdatabase deployment section -->
+	<target name="deploy_asdb">	
+		<foreach item="Folder" in="${temp.appdeploy.dir}" property="foldername">
+			<property name="app_name" if="${string::contains(foldername,'\')}" value="${string::substring(foldername, string::last-index-of(foldername,'\')+1, string::get-length(foldername)-string::last-index-of(foldername,'\')-1)}" />
+			<property name="ssas.name"	value="${foldername}\${app_name}.asdatabase"/>
+			<property name="ssas.log"	value="${foldername}\deployment.log"/>
+			<call target="create_ssas"/>
+		</foreach>
+	</target>	
+	
+	<!-- Bat file called to deploy the asdatabase -->
+	<target name="create_ssas">
+		<exec program="..\..\NANT v0.92\Thirdparty Tools\Batch\deploy_ssas.cmd" >
+			<arg value="${ssas.name}" />
+			<arg value="${ssas.log}" />
+		</exec>
+	</target>
+	
+	<!-- SSAS Target -->
+	
+	<!-- Start : Common Functions for SSIS SSAS SSRS -->
+		
+	<!-- Decision making function. Calls the partial deployment task if specific project is present -->
+	<target name="prepare_appdeployable_bids">
+		<choose>
+			<!-- Check for particular project from configuration file -->
+			<when test="${string::get-length(specific.project) > 0}">
+				<call target="prepare_appdeployable_partial_items"/>
+			</when>
+			<!-- For all projects folder to folder copy only -->
+			<otherwise>
+				<call target="prepare_appdeployable_full_items"/>
+			</otherwise>
+		</choose>
+	</target>
+	
+	<!-- If specific project is not mentioned then this task will be called -->
+	<target name="prepare_appdeployable_full_items">
+	    <!-- First it moves all the folders from build folder to backup folder -->		
+		<copy todir="${temp.bids.backup.dir}" overwrite="true">
+			<fileset basedir="${temp.build.output.dir}">
+					<exclude name="**/*.nant_template"/>
+					<exclude name=".svn" />
+					<exclude name="_svn" />  
+					<include name="**/*.*"/>
+			</fileset>
+		</copy>
+		<!-- It cleans the AppDeploy folder before moving all the folders from backup folder to AppDeploy folder -->
+		<call target="clean_appdeploy"/>
+		<!-- Moving all the folders from backup folder to AppDeploy folder -->
+		<copy todir="${temp.appdeploy.dir}" overwrite="true">
+			<fileset basedir="${temp.bids.backup.dir}">
+					<exclude name=".svn" />
+					<exclude name="_svn" />  
+					<exclude name="**/*.zip"/>
+					<include name="**/*.*"/>
+			</fileset>
+		</copy>
+	</target>
+	
+	<!-- This target will be called if specific project is mentioned in the merge file -->
+	<target name="prepare_appdeployable_partial_items">
+		
+		<!-- Copying the specific projects from Build folder to Backup folder -->
+		<foreach item="String" in="${specific.project}" delim="," property="project">
+			<do>
+			<!-- Moving Specific projects from build folder to Backup folder -->
+			<copy todir="${temp.bids.backup.dir}\${project}"> 
+					<fileset basedir="${temp.build.output.dir}/${project}">
+						<include name="**/*.*" />
+					</fileset>
+			</copy>
+			</do> 
+		</foreach>
+		
+		<!-- It cleans the AppDeploy folder before moving the specific projects from Backup folder to AppDeploy folder -->
+		<call target="clean_appdeploy"/>
+		
+		<!-- Copying the specific projects Backup folder to AppDeploy folder -->
+		<foreach item="String" in="${specific.project}" delim="," property="project">
+			<do>
+			<!-- Copying Specific projectBackup folder to AppDeploy folder -->
+			<copy todir="${temp.appdeploy.dir}\${project}">
+					<fileset basedir="${temp.bids.backup.dir}/${project}">
+					<exclude name="**/*.zip"/>
+					<include name="**/*.*" />
+					</fileset>
+			</copy>
+			</do> 
+		</foreach>
+		
+	</target>
+	
+	<!-- Decision making task to identify partial backup or full backup -->
+	<target name="backup_bids_item">
+		<if test="${directory::exists(temp.bids.backup.dir)}">
+			<!-- Preparing backup directory -->
+			<choose>
+				<!-- Check for particular project from configuration file -->
+				<when test="${string::get-length(specific.project) > 0}">
+					<call target="bids_partial_backup"/>
+				</when>
+				<!-- For all projects folder to folder copy only -->
+				<otherwise>
+					<call target="bids_full_backup"/>
+				</otherwise>
+			</choose>
+		</if>
+	</target>
+	
+	<!-- Task to identify the projects for backup of specific projects -->
+	<target name="bids_partial_backup">
+		<foreach item="String" in="${specific.project}" delim="," property="project">
+			<copy todir="${temp.backup.dir}/${project}">
+				<fileset basedir="${temp.bids.backup.dir}\${project}">
+					<include name="**/*.*"/>
+					<exclude name="**/*.zip"/>
+				</fileset>
+			</copy>			
+		</foreach>
+		<call target="Zipfile"/>
+	</target>
+	
+	<!-- Task for taking the full backup if specific project is not required-->
+	<target name="bids_full_backup">
+		<copy todir="${temp.backup.dir}">
+			<fileset basedir="${temp.bids.backup.dir}">
+				<include name="**/*.*"/>
+				<exclude name="**/*.zip"/>
+			</fileset>
+		</copy>		
+		<call target="Zipfile"/>
+	</target>
+	
+	<!-- Zip Creation --> 	
+	<target name="Zipfile">		
+		<!-- Zip all backup -->
+		<zip zipfile="${backup.dir}/${project.type}/backup_${string::to-lower(project.type)}_${build.lastdate}.zip">
+			<fileset basedir="${temp.backup.dir}" prefix="">
+				<exclude name="**/*.txt"/>
+				<exclude name="**/*.log"/>
+				<include name="*" />
+				<include name="**/*" />
+			</fileset>
+		</zip>		
+		<if test="${property::exists('temp.backup.dir')}">
+			<delete dir="${temp.backup.dir}" />
+		</if>
+	</target>
+	
+	<!-- Target only unzip the backup.zip from rollback.path in AppDeploy folder -->
+	<target name="unzip_bids_prepared_appdeploy">
+		<property name="last.executed.target" value="Un-zipped and prepared deployable"/>
+		<property name="project.type" value="${project.type} - Rollback"/>
+		<property name="svn.branch.merge" value=""/>
+		<property name="svn.revision.to" value=""/>
+		<property name="svn.branch.revision.from" value=""/>
+		<property name="svn.branch.revision.to" value=""/>		
+		<choose>
+			<when test="${file::exists(rollback.path)}">
+				<echo message="Given roll back zip file exist at:  ${path::get-full-path(rollback.path)}" />
+				<call target="clean_appdeploy"/>
+				<unzip zipfile="${rollback.path}" todir="${temp.appdeploy.dir}" overwrite="true"/>			
+			</when>
+			<otherwise>
+				<fail message="Given roll back zip file does not exist at:  ${path::get-full-path(rollback.path)}" />
+			</otherwise>
+		</choose>
+	</target>	
+	<!-- Rollback SSIS SSAS -->
+	
+	<!-- Job Proxy Mapping -->
+	<target name="job_proxy_mapping">
+		<foreach item="File" property="sql_proxy_filename">
+			<in>
+				<items basedir="${temp.appdeploy.proxy.sql.dir}">
+					<include name="**/*.sql" />
+				</items>
+			</in>
+			<do>
+				<property name="connection.string"	value="${job.proxy.sql.connection.string.path}"/>		
+				<property name="sql.log.path" value="..\..\logs\SQLJob_Proxy" />
+				<tstamp property="log.date.time" pattern="yyyy-MM-dd_HH-mm-ss"/>
+				<mkdir dir="${sql.log.path}" if="${not directory::exists(sql.log.path)}" />
+				<property name="sql.file.log" value="${sql.log.path}\${path::get-file-name-without-extension(sql_proxy_filename)}_${log.date.time}.log" />
+				<if test="${string::get-length(connection.string) > 0}">					
+					<exec program="sqlcmd" >
+						<arg value="${string::trim(connection.string)} -b -i &quot;${sql_proxy_filename}&quot;"/>
+					</exec>
+				</if>
+			</do>
+		</foreach>
+	</target>	
+	<!-- End: Common Functions for SSIS SSAS SSRS -->
+	
+	<target name="copy_scheduled_Task_Config"> 
+		<if test="${directory::exists(deploy.schedule.task.config.dir)}">
+			<delete dir="${deploy.schedule.task.config.dir}" />
+		</if>
+		<copy todir="${deploy.schedule.task.config.dir}" overwrite="true">
+			<fileset basedir="${appdeploy.schedule.task.config.dir}">
+				<exclude name="**/*.nant_template"/>
+				<include name="**/*"/>
+			</fileset>
+		</copy>
+	</target>
+	<!-- NANT Template -->
+	<target name="process_templates">
+		<property name="template.extension" value=".nant_template" if="${not property::exists('template.extension')}" />
+		<foreach item="File" property="template_file" >
+			<in>  
+				<items basedir="${temp.project.source.dir}" >  
+					<include name="**/*${template.extension}"/>
+				</items>  
+			</in>  
+			<do>
+				<copy file="${template_file}" 
+					tofile="${string::substring(template_file,0,string::get-length(template_file)-string::get-length(template.extension))}" 
+					overwrite="true">
+					<filterchain>
+						<expandproperties />
+					</filterchain>
+				</copy>
+			</do>
+		</foreach>
+	</target>
+</project>
