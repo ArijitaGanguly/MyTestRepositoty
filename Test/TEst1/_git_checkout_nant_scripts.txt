@@ -1,0 +1,10 @@
+@echo off
+set currdir=%cd%
+\\grvs37\git\bin\git init
+\\grvs37\git\bin\git remote add -f origin //grvs37/git_deployment
+\\grvs37\git\bin\git pull origin Test_Server_Prep_07102015
+\\grvs37\git\bin\git reset --hard origin/Test_Server_Prep_07102015
+pause
+
+
+
