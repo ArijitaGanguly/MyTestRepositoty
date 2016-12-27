@@ -1,0 +1,208 @@
+<project name="devinclude"> 
+	<!-- Common Configuration -->
+	<property name="svn.installed.path"		value="\\grvs37\subversion"/>
+	<property name="verbose" value="true"/>	
+	<property name="backup.dir"		value="..\..\backups"/>
+	<property name="environment.variables" value="AIMCOWeb~E:\AIMCOWEB"/>
+	<property name="root.dir" value="E:"/>
+	<property name="temp.sourcecode.build.output.dir" value="E:\NANT_Temp"/>
+	<property name="service.account.userid" value="AIMCO\_DCODAPP030"/>
+	<property name="service.account.password" value="73F5994E8049D5BE8B35C3F50DE907C6"/>
+	<property name="deployment.environment" value="DEV"/>
+	<property name="merge.with.branch" value="true"/>
+	
+	<!-- IIS Configuration -->
+	<property name="iis.website"		value="devintranet2015.aimco.com"/>
+	<property name="iis.base.dir"		value="E:\inetpub"/>
+	<property name="iis.prod.dir"		value="${iis.base.dir}\intranet.aimco.com"/>
+	<property name="iis.is80"		value="false"/>
+	<property name="iis.contentdir"		value="E:\Inetpub\intranet.aimco.com_content"/>
+
+	<!-- Website Configuration -->
+	<property name="website.repos"		value="http://subversion.aimco.com/svn/WebDev/apps_rationalization/AimcoWebApps/Trunk/Source/AimcoApps/Intranet.Aimco.Com"/>
+	<property name="website.revision.to"		value="HEAD"/>
+	<property name="website.deploy.dir"		value="${iis.prod.dir}" />
+	<property name="anonymous.auth.enable.project"		value="" />
+	<property name="website.asp.convert.to.app"		value="" />
+	<property name="website.default.page" value="" />
+	
+	<!-- Content VD -->
+	<property name="website.content.vd.required.root"		value="" />
+	<property name="website.content.vd.required.app.lebel"		value="" />
+	
+	<!-- Apppool Configuration -->
+	<property name="default.root.app.pool" value="IntranetAppPool4.5"/>
+	<property name="app.pool.clasic.asp" value="IntranetDefaultAppPool"/>
+	<property name="app.pool.net45" value="IntranetAppPool4.5"/>
+	<property name="app.pool.bit32.net45" value="Intranet32bitAppPool4.5"/>
+	<property name="bit32.required.app" value=""/>
+	
+	<!-- GAC Configuration -->
+	<property name="gac.repos"		value="http://subversion.aimco.com/svn/WebDev/apps_rationalization/Application/Trunk/Source/GAC"/>	
+	<property name="gac.revision.to"		value="HEAD"/>
+	<property name="gac.deploy.dir"		value="E:\AIMCOWEB\NetDLL" />
+		
+	<!-- COM Configuration -->
+	<property name="com.repos"		value="http://subversion.aimco.com/svn/WebDev/apps_rationalization/Application/Trunk/Deployable/DLLs/COM"/>
+	<property name="com.revision.to"		value="HEAD"/>	
+	<property name="com.deploy.dir"		value="E:\AIMCOWEB\Components" />
+	<property name="com.admin.ad.projects"	 value="MTS_ADSI,ExchAdmin" />
+	<property name="com.admin.userid"	 value="AIMCO\_Intranet" />
+	<property name="com.admin.password"	 value="C5B72AA95AE66E60E02305D5EBDBAA6F" />
+	
+	<!-- Windows Service Configuration -->
+	<property name="wins.repos"		value="http://subversion.aimco.com/svn/WebDev/apps_rationalization/Application/Trunk/Source/Services"/>
+	<property name="wins.revision.to"		value="HEAD"/>	
+	<property name="wins.deploy.dir"		value="E:\AIMCOWEB\Apps" />
+	
+	<!-- EXE Configuration -->
+	<property name="exe.repos"		value="http://subversion.aimco.com/svn/WebDev/apps_rationalization/Application/Trunk/Source/Executables/AimcoJobComponents"/>
+	<property name="exe.revision.to"		value="HEAD"/>	
+	<property name="exe.deploy.dir"		value="E:\AimcoWeb\Apps" />
+	
+	<!-- Schedule Task Configuration -->
+	<property name="schedule.repos"		value="http://subversion.aimco.com/svn/WebDev/apps_rationalization/Application/Trunk/Source/Executables/AimcoScheduledTasks"/>
+	<property name="schedule.revision.to"		value="HEAD"/>	
+	<property name="schedule.deploy.dir"		value="E:\AIMCOWEB\Apps" />
+	
+	<!-- Config File Configuration -->
+	<property name="config.file.repos"		value="http://subversion.aimco.com/svn/WebDev/apps_rationalization/Application/Trunk/Deployable/Configuration File"/>
+	<property name="application.config.dir" 	value="E:\AIMCOWEB\config"/>
+	<property name="config.revision.to"		value="HEAD"/>
+
+	<!-- SQL File Configuration -->
+	<property name="sql.file.repos"		value="http://subversion.aimco.com/svn/WebDev/apps_rationalization/Application/Trunk/Deployable/SQL"/>
+	<property name="sql.connection.string.path"		value="${application.config.dir}"/>
+	<property name="sql.connection.string.path"		value="-S DCOTSQL104"/>
+	<property name="sql.revision.to"		value="HEAD"/>
+	
+	<!-- Parameterized Values -->
+	<property name="AFRReportsToVistaImport_host"   value="GRVS110"/>
+	<property name="DispositionPDFMirror_Intranet_Content_REM_Mirrors_From"   value="D:\Data\DispositionPDFs"/>
+	<property name="DispositionPDFMirror_Intranet_Content_REM_Mirrors_To"   value="\\GRVS133\Intranet_Content\Dispositions\DispositionPDFs"/>
+	<property name="DispositionPDFMirror_robocopy_Intranet_Content_From"   value="\\GRVS12\Data\DispositionPDFs_DEV"/>
+	<property name="DispositionPDFMirror_robocopy_Intranet_Content_To"   value="\\DCODAPP030\Intranet_Content\Dispositions\DispositionPDFs"/>
+	<property name="DispositionPDFMirror_Web_Content_REM_Mirrors_To"   value="\\GRVS134\Web_Content\Dispositions\DispositionPDFs"/>
+	<property name="DispositionPDFMirror_robocopy_Web_Content_From"   value="\\GRVS12\Data\DispositionPDFs_DEV"/>
+	<property name="DispositionPDFMirror_robocopy_Web_Content_To"   value="\\DCODAPP030\Web_Content\Dispositions\DispositionPDFs"/>
+	<property name="OldEmailDelete_Computer_Name"   value="DCODAPP030"/>
+	<property name="OldEmailDelete_Mail_To"   value="rajat.biswas@aimco.com;ranjan.das@aimco.com;pinaki.ghosh@aimco.com;arijita.gangopadhyay@aimco.com"/>
+	<property name="OldEmailDeletion_NotifyEmail"   value="rajat.biswas@aimco.com;ranjan.das@aimco.com;pinaki.ghosh@aimco.com;arijita.gangopadhyay@aimco.com"/>
+	<property name="OldEmailDeletion_MailboxName"   value="Inquiries.Dev@aimco.com"/>
+	<property name="OldEmailDeletion_MailboxEmail"   value="Inquiries.Dev@aimco.com"/>
+	<property name="OldEmailDeletion_BCCEmailUser"   value="apartmentliving@aimco.com"/>
+	<property name="FocusService_NotifyEmail"   value="rajat.biswas@aimco.com;ranjan.das@aimco.com;pinaki.ghosh@aimco.com;arijita.gangopadhyay@aimco.com"/>
+	<property name="ImageUploadAlert_UploadServerPath"   value="\\DCODAPP030\web_content\aptimages\awaitingapproval\"/>
+	<property name="ImageUploadAlert_UploadHTTPPath"   value="http://devww22015.aimco.com/aptimages/awaitingapproval/"/>
+	<property name="ImageUploadAlert_ApprovedServerPath"   value="\\DCODAPP030\web_content\aptimages\"/>
+	<property name="ImageUploadAlert_ApprovedHTTPPath"   value="http://devww22015.aimco.com/aptimages/"/>
+	<property name="ImageUploadAlert_ApprovedAppPath"   value="http://devintranet2015.aimco.com/propertyadmin/imageupload/"/>
+	<property name="LeadService_log4net_debug"   value="TRUE"/>
+	<property name="LeadService_levelMin_value"   value="INFO"/>
+	<property name="LeadService_priority_value"   value="INFO"/>
+	<property name="LeadService_RunWithHardcodedProperty"   value="TRUE"/>
+	<property name="LeadService_NotifyEmail"   value="rajat.biswas@aimco.com;ranjan.das@aimco.com;pinaki.ghosh@aimco.com;arijita.gangopadhyay@aimco.com"/>
+	<property name="LeadService_MailboxName"   value="Inquiries.Dev@aimco.com"/>
+	<property name="LeadService_MailboxEmail"   value="Inquiries.Dev@aimco.com"/>
+	<property name="LeadService_FocusWS_URL"   value="http://devintranet2015.aimco.com/FocusWS/FocusWS.asmx"/>
+	<property name="LeadService_SkipMailFilter"   value="Confirmation for Posting|noreply@craigslist.org"/>
+	<property name="NSFX_Email"   value="rajat.biswas@aimco.com"/>
+	<property name="NSFX_NSFDataFolder"   value="%AIMCOWEB%\Apps\NSFX\NSFData"/>
+	<property name="NSFX_7Zip"   value="c:\Program Files\7-Zip\7za.exe"/>
+	<property name="purgeoldlogfiles_Folder_path"   value="\\DCODAPP030\e$\Program Files\Webtrends\SmartSource Data Collector\weblogs"/>
+	<property name="RealPage_SDE_Import_RootDirectory"   value="\\grvs12\data\RealPage\Web\Dev\"/>
+	<property name="RealPage_SDE_Import_PeoplesoftFTPSite"   value="dcodps111.aimco.com"/>
+	<property name="RealPage_SDE_Import_PeoplesoftDefaultPath"   value="/tstpsbat/fs91tstb/fs91tst/aimco/ptmp/"/>
+	<property name="RealPage_SDE_Import_VistaPrinterName"   value="vista_dev"/>
+	<property name="RealPage_SDE_Import_ClientSettingsProvider"   value=""/>
+	<property name="RealPage_SDE_Import_FTP_Integration_FileMover_SFTPGet_UserID"   value="aimcoqa"/>
+	<property name="RealPage_SDE_Import_FTP_Integration_FileMover_SFTPGet_Pwd"   value="qu@l1ty"/>
+	<property name="RealPage_SDE_Import_FTP_Integration_FileMover_Dest"   value="\\grvs12\data\RealPage\Web\Dev\SDE\Download\New"/>
+	<property name="RealPage_SDE_Import_FTP_Integration_FileMover_Dest_1"   value="\\grvs12\data\RealPage\Web\Dev\SDE\Download\SDELogs"/>
+	<property name="RealPage_SDE_Import_FTP_Integration_FileMover_EmailOnError"   value="rajat.biswas@aimco.com;ranjan.das@aimco.com;pinaki.ghosh@aimco.com;arijita.gangopadhyay@aimco.com"/>
+	<property name="RealPage_SDE_Import_FTP_Integration_RunSDE"   value="\\grvs12\data\RealPage\Web\Dev\SDE\Download\New"/>
+	<property name="SharedWebContentService_NotifyEmail"   value="rajat.biswas@aimco.com;ranjan.das@aimco.com;pinaki.ghosh@aimco.com;arijita.gangopadhyay@aimco.com"/>
+	<property name="SharedWebContentService_GrantedIPs"   value="127.0.0.1;10.10.13.99;10.10.6.100;10.10.11.156"/>
+	<property name="SharedWebContentService_baseAddress"   value="http://10.10.58.30:8018/SharedWebContent/Service"/>
+	<property name="SharedWebContentService_bindingNameSpace"   value="http://aimco.com/sharedwebcontent"/>
+	<property name="StockFetch_DestFolder"   value="\\DCODAPP030\E$\Inetpub\intranet.Aimco.com\Inc\content"/>
+	<property name="StockFetch_NotifyEmail"   value="rajat.biswas@aimco.com;ranjan.das@aimco.com;pinaki.ghosh@aimco.com;arijita.gangopadhyay@aimco.com"/>
+	
+	<property name="Intranet_DB_UnitAvailability_Host_NotifyEmail"   value="Rajat.Biswas@aimco.com;pinaki.ghosh@aimco.com"/>
+	<property name="Intranet_DB_UnitAvailability_Export_ErrorEmail"   value="Rajat.Biswas@aimco.com;pinaki.ghosh@aimco.com"/>
+	<property name="Intranet_DB_UnitAvailability_Servicehost_NotifyEmail"   value="Rajat.Biswas@aimco.com;pinaki.ghosh@aimco.com"/>
+	<property name="Intranet_DB_UnitAvailability_Servicehost_baseAddresses"   value="http://localhost:8015/UnitAvailability"/>
+	
+	<property name="Decision_Support_eCustomer800Number_DataSource"   value="DCODSQL104\GRVS48"/>
+	<property name="Decision_Support_eCustomer800Number_WebServiceURL"   value="http://DCOTESB156:8380/RealpageServices/ebws/Webservice/CommonWebservice"/>
+	<property name="RealPage_UDS_Import_RealPageRootDirectory"  value="d:\data\RealPage_UDS\"/>
+	<property name="RealPage_UDS_Import_RealPageUDSFTPSite"  value="udsmft.realpage.com"/>
+	<property name="RealPage_UDS_Import_RealPageUDSFTPDirectory"   value="uds_download"/>
+	<property name="RealPage_UDS_Import_RealPageUDSFTPUserName"  value="EXT-1188641_UDS"/>
+	<property name="RealPage_UDS_Import_RealPageEncryptedPassword"  value="EAAAAIn+IMmom3JnaJDGzJaYhN6whj2x5WXzLDYTnfSANsRa"/>
+	<property name="Decision_Support_Pricing_Feed_Copy"   value="\\grvs12\Data\Horizon_Test\Horizon_Dev\PricingDBBackup\PricingBackup.bak.gz"/>
+	
+	<property name="Sandbox_CRGenerator_DestPath"   value="\\DCODAPP030\Content\reports\reportfiles\crystal"/>
+	<property name="Sandbox_EnvironmentalReports_EnvRptsDir"   value="\\grvs10\data\Horizon_Test\Horizon_Dev\horizon\EnvironmentalReports"/>
+	<property name="Sandbox_EnvironmentalReports_EmailFrom"   value=""/>
+	<property name="Sandbox_EnvironmentalReports_EmailOnJobSuccess"   value=""/>
+	<property name="Sandbox_EnvironmentalReports_EmailOnJobFailure"   value=""/>
+	<property name="Sandbox_EnvironmentalReportsFTP.ps1_SQLserver"   value="DCODSQL102"/>
+	<property name="Sandbox_MaintSurveyImport_ErrorEmail"   value="Pradip.Choubey@aimco.com;rukmini.dutt@aimco.com"/>
+	<property name="Sandbox_MaintSurveyImport_LogDir"   value="D:\data_import\MaintSurvey\log"/>
+	<property name="Sandbox_NYPropertyResidentStatement_EmailOnJobSuccess"   value="Pradip.Choubey@aimco.com,rukmini.dutt@aimco.com"/>
+	<property name="Sandbox_NYPropertyResidentStatement_EmailOnJobFailure"   value="Pradip.Choubey@aimco.com,rukmini.dutt@aimco.com"/>
+	<property name="Sandbox_PA_File_Handler_LogDir"   value="D:\data_import\PA\Log\"/>
+	<property name="Sandbox_mirror_env_rpts_sourcepath"   value="\\grvs10\data\Horizon_Test\Horizon_Dev\horizon\EnvironmentalReports"/>
+	<property name="Sandbox_mirror_env_rpts_destinationpath"   value="\\DCODAPP030\Content\Environmental_Reports"/>
+	<property name="Sandbox_mirror_env_rpts_logpath"   value="D:\TSQLLogs\Copy Environmental Reports - Step 1.txt"/>
+	<property name="Sandbox_FTPDownload_userid"   value="1188988"/>
+	<property name="Sandbox_FTPDownload_password"   value="EAAAAHsXipRyduAMqePylSUJk8LuYNMZRCXoyEeRUJUxn2Rj"/>
+	<property name="Sandbox_FTPDownload_fullbackupcheckday"   value="3"/>
+	<property name="Sandbox_FTPDownload_filenamepattern"   value="U1188641_"/>
+	<property name="Sandbox_FTPFullBackupCheckerAndRename_userid"   value="1188988"/>
+	<property name="Sandbox_FTPFullBackupCheckerAndRename_password"   value="EAAAAHsXipRyduAMqePylSUJk8LuYNMZRCXoyEeRUJUxn2Rj"/>
+	<property name="Sandbox_FTPFullBackupCheckerAndRename_fullbackupcheckday"   value="3"/>
+	<property name="Sandbox_FTPFullBackupCheckerAndRename_filenamepattern"   value="U1188641_"/>
+	<property name="Sandbox_FTPMailSend_userid"   value="1188988"/>
+	<property name="Sandbox_FTPMailSend_password"   value="EAAAAHsXipRyduAMqePylSUJk8LuYNMZRCXoyEeRUJUxn2Rj"/>
+	<property name="Sandbox_FTPMailSend_recipients"   value="Pradip.Choubey@aimco.com;rukmini.dutt@aimco.com"/>
+	<property name="Sandbox_FTPMailSend_filenamepattern"   value="Incr_U1188641_"/>
+	<property name="Sandbox_UDSRemoveOldPart_userid"   value="1188988"/>
+	<property name="Sandbox_UDSRemoveOldPart_password"   value="EAAAAHsXipRyduAMqePylSUJk8LuYNMZRCXoyEeRUJUxn2Rj"/>
+	<property name="Sandbox_UDSRemoveOldPart_fullbackupcheckday"   value="3"/>
+	<property name="Sandbox_UDSRemoveOldPart_filenamepattern"   value="old_U1188641_"/>
+	<property name="Sandbox_RealPage_UDS_UDS_movefile_del_path"   value="\\grvs12\data\Horizon_Test\Horizon_Dev\RealPage\Web\Prod\UDS\*.bak"/>
+	<property name="Sandbox_RealPage_UDS_UDS_movefile_copy_path"   value="\\grvs12\data\Horizon_Test\Horizon_Dev\RealPage\Web\Prod\UDS\*.bak"/>
+	<property name="Sandbox_PricingXML_EmailOnJobSuccess"   value="Pradip.Choubey@aimco.com;rukmini.dutt@aimco.com"/>
+	<property name="Sandbox_PricingXML_EmailOnJobFailure"   value="Pradip.Choubey@aimco.com;rukmini.dutt@aimco.com"/>
+	<property name="Sandbox_PricingXML_EmailOnRecommendationsNeeded"   value="Pradip.Choubey@aimco.com;rukmini.dutt@aimco.com"/>
+	<property name="Sandbox_PricingXML_EmailOnRecommendationsLoadStatus"   value="Pradip.Choubey@aimco.com;rukmini.dutt@aimco.com"/>
+	<property name="Sandbox_PricingXML_EmailOnPROFITNewLeaseLoadStatus"   value="Pradip.Choubey@aimco.com;rukmini.dutt@aimco.com"/>
+	<property name="Sandbox_PricingXML_EmailOnPROFITAmenityLoadStatus"   value="Pradip.Choubey@aimco.com;rukmini.dutt@aimco.com"/>
+	<property name="Sandbox_PricingXML_UnitPricingUploadExceptionReportURL"   value="http://DCODSQL102/ReportServer?%2fDevelopment%2fPricing%2fUnit+Pricing+Upload+Exceptions"/>
+	<property name="Sandbox_PricingXML_UnitPricingNotificationReportURL"   value="http://DCODSQL102/ReportServer?%2fDevelopment%2fPricing%2fUnit+Pricing+Notification"/>
+	<property name="Sandbox_PricingXML_RenewalPricingUploadExceptionReportURL"   value="http://DCODSQL102/ReportServer?%2fDevelopment%2fPricing%2fRenewal+Pricing+Upload+Exceptions"/>
+	<property name="Sandbox_PricingXML_ExportedAutomatedRenewalLettersReportURL"   value="http://DCODSQL102/ReportServer"/>
+	<property name="Sandbox_PricingXML_PricingWebsiteURL"   value="http://devhorizon2015.aimco.com/Pricing/Pricing.aspx"/>
+	<property name="Sandbox_PricingXML_TestingMode"   value="TRUE"/>
+	<property name="Sandbox_PricingXML_DebugMode"   value="TRUE"/>
+	<property name="Sandbox_PricingXML_EmailRenewalLettersToAddress"   value="Pradip.Choubey@aimco.com;rukmini.dutt@aimco.com"/>
+	<property name="Sandbox_PricingXML_ARLOutputPath"   value="D:\data_export\RenewalLetters"/>
+	<property name="Sandbox_PricingXML_FTPUserName"   value="gaw/aimco"/>
+	<property name="Sandbox_PricingXML_FTPPassword"   value="aipw*89"/>
+	<property name="Sandbox_PricingXML_YSDataIssuesEmailTo"   value="Pradip.Choubey@aimco.com;rukmini.dutt@aimco.com"/>
+	<property name="Sandbox_PricingXML_ProsKeyFile"   value="D:\AIMCOWeb\Apps\PricingXML\ppss-dev.pbk"/>
+	<property name="Sandbox_PricingXML_ProsURL"   value="http://lppsdev:8080/axis2/services/SystemService"/>
+	
+	<!-- Mail Notification Configuration -->
+	<property name="mail.send.required"	value="true"/>	
+	<property name="email.to.list"		value="rajat.biswas@aimco.com;pinaki.ghosh@aimco.com"/>
+	<property name="email.cc.list"		value=""/>
+	<property name="email.bcc.list"		value=""/>
+	<property name="email.from"		value="Subversion@aimco.com"/>
+	<property name="smtp.host"		value="smtp.aimco.com"/>
+	<property name="smtp.port"		value="25"/>
+	<property name="ssl"			value="false"/>
+		
+</project>

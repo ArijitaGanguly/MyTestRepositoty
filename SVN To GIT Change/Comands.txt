@@ -1,0 +1,18 @@
+-- 1. Checkout (cloning)
+<!--
+<svn-checkout uri="${svn.repos}" destination="${temp.project.source.dir}" revision="${svn.revision.to}" username="${svn.username}" quiet="false"/>
+-->
+
+@echo off
+set currdir=%cd%
+\\grvs37\git\bin\git init
+\\grvs37\git\bin\git clone "E:\Arijita\GIT Local Repository" "E:\Arijita\GIT_Test\New folder"
+pause
+
+<!-- 
+GIT Equivalent of SVN Revision number
+http://stackoverflow.com/questions/4120001/what-is-the-git-equivalent-for-revision-number
+
+git clone --depth 1 github.com:ORG-NAME/Repo.git -b <Branch-Name/Commit-Number/TAG>
+
+-->

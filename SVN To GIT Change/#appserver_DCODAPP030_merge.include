@@ -1,0 +1,57 @@
+<project name="mergeinclude"> 
+	<!-- Website Merge Configuration -->
+	<property name="website.merge.with.branch" value="false"/>
+	<property name="website.merge.branch.repos"		value="http://subversion.aimco.com/svn/WebDev/apps_rationalization/AimcoWebApps/Branch/19128_12222015/Source/AimcoApps/Intranet.Aimco.Com"/>
+	<property name="website.merge.branch.revision.from"		value="23083"/>
+	<property name="website.merge.branch.revision.to"		value="HEAD"/>
+	<property name="website.specific.project"			value=""/>
+		
+	<!-- GAC Merge Configuration -->
+	<property name="gac.merge.with.branch" value="true"/>
+	<property name="gac.merge.branch.repos"		value="http://subversion.aimco.com/svn/WebDev/apps_rationalization/Application/Branch/19128_12312015_NANT_Template/Source/GAC"/>	
+	<property name="gac.merge.branch.revision.from"		value="23115"/>
+	<property name="gac.merge.branch.revision.to"		value="HEAD"/>
+	<property name="gac.specific.project"			value=""/>
+
+	<!-- COM  Merge Configuration -->
+	<property name="com.merge.with.branch" 			value="true"/>
+	<property name="com.merge.branch.repos"		value="http://subversion.aimco.com/svn/WebDev/apps_rationalization/Application/Branch/19128_12312015_NANT_Template/Deployable/DLLs/COM"/>	
+	<property name="com.merge.branch.revision.from"		value="23115"/>
+	<property name="com.merge.branch.revision.to"		value="HEAD"/>
+	<property name="com.specific.project"			value=""/>
+
+	<!-- Windows Service Merge Configuration -->
+	<property name="wins.merge.with.branch" value="true"/>
+	<property name="wins.merge.branch.repos"		value="http://subversion.aimco.com/svn/WebDev/apps_rationalization/Application/Branch/19128_12312015_NANT_Template/Source/Services"/>
+	<property name="wins.merge.branch.revision.from"	value="23115"/>
+	<property name="wins.merge.branch.revision.to"		value="HEAD"/>
+	<property name="wins.specific.project"			value=""/>
+		
+	<!-- EXE Merge Configuration -->
+	<property name="exe.merge.with.branch" value="true"/>
+	<property name="exe.merge.branch.repos"		value="http://subversion.aimco.com/svn/WebDev/apps_rationalization/Application/Branch/19128_12312015_NANT_Template/Source/Executables/AimcoJobComponents"/>
+	<property name="exe.merge.branch.revision.from"		value="23115"/>
+	<property name="exe.merge.branch.revision.to"		value="HEAD"/>
+	<property name="exe.specific.project"			value="FileMover"/>
+		
+	<!-- Schedule Task Merge Configuration -->
+	<property name="schedule.merge.with.branch" value="true"/>
+	<property name="schedule.merge.branch.repos"		value="http://subversion.aimco.com/svn/WebDev/apps_rationalization/Application/Branch/19128_12312015_NANT_Template/Source/Executables/AimcoScheduledTasks"/>
+	<property name="schedule.merge.branch.revision.from"		value="23115"/>
+	<property name="schedule.merge.branch.revision.to"		value="HEAD"/>
+	<property name="schedule.specific.project"			value=""/>
+	<property name="schedule.backup.project"			value="AutoUser:Plateau_FTP:RunAsync:DispositionPDFMirror:OldEmailDelete:NSFX:purge-old-log-files:Vista Plus Server:ScheduleTaskCreationConfig"/>
+	
+	<!-- Config Merge Configuration -->
+	<property name="config.merge.with.branch" value="true"/>
+	<property name="config.merge.branch.repos"		value="http://subversion.aimco.com/svn/WebDev/apps_rationalization/Application/Branch/19128_12222015/Deployable/Configuration File"/>
+	<property name="config.merge.branch.revision.from"		value="23082"/>
+	<property name="config.merge.branch.revision.to"		value="HEAD"/>
+
+	<!-- SQL Merge Configuration -->
+	<property name="sql.merge.with.branch" value="true"/>
+	<property name="sql.merge.branch.repos"		value="http://subversion.aimco.com/svn/WebDev/apps_rationalization/Application/Branch/19128_12222015/Deployable/SQL"/>
+	<property name="sql.merge.branch.revision.from"		value="23082"/>
+	<property name="sql.merge.branch.revision.to"		value="HEAD"/>
+		
+</project>

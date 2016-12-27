@@ -1,0 +1,87 @@
+<!-- Start: SVN Task Section -->
+	
+	<!-- Init the svn.username variable -->
+	<target name="svn.username_init">
+		<property name="svn.username" 
+			if="${property::exists('svn.userdomain') and property::exists('svn.userlogin')}"
+			value="${string::to-upper(svn.userdomain)}\${string::to-lower(svn.userlogin)}" />
+	</target>
+		
+	<!-- SVN_COMPLETE:  Will get the specified repository directory and put on local computer. -->
+	<target name="svn_complete">
+		<property name="last.executed.target" value="SVN complete code checked out"/>
+		<delete dir="${temp.project.source.dir}" failonerror="false"/> 
+		<svn-checkout uri="${svn.repos}" destination="${temp.project.source.dir}" revision="${svn.revision.to}" username="${svn.username}" quiet="false"/>
+	</target>
+
+	<!-- SVN_UPDATE:  Will update the local working copy to the latest HEAD or specific version in the repository. -->
+	<target name="svn_update" depends="svn.username_init">
+		<if test="${ not directory::exists(temp.project.source.dir)}">
+			<echo message="Directory does not exist on server, must get complete contents from repository"/>
+			<call target="svn_complete"/>
+		</if>		
+		<call target="svn_revert"/>	
+		<call target="svn_non_vers"/>	
+		<property name="last.executed.target" value="SVN code update"/>
+		<if test="${directory::exists(temp.project.source.dir)}">
+			<svn-update uri="${svn.repos}" destination="${temp.project.source.dir}" username="${svn.username}" quiet="false"/>
+		</if>
+		<!-- Merge with branch if required -->
+		<if test="${merge.with.branch == 'true' and svn.branch.merge == 'true'}">
+			<call target="svn_merge"/>
+			<call target="svn_check_conflicts"/>
+		</if>		
+	</target>
+	
+	<target name="svn_revert">
+		<property name="last.executed.target" value="SVN code revert"/>
+		<svn command="revert" uri="${svn.repos}" destination="${temp.project.source.dir}" username="${svn.username}">
+			<arg line="revert . --recursive" />
+		</svn>
+	</target>
+	
+	<target name="svn_merge">
+		<property name="last.executed.target" value="SVN code merge"/>
+		<echo message="Merging changes for branch: ${svn.branch.url} - from : ${svn.branch.revision.from} to : ${svn.branch.revision.to}" />
+		<svn command="merge" uri="${svn.repos}" username="${svn.username}">
+			<arg line="merge --force -r${svn.branch.revision.from}:${svn.branch.revision.to} &quot;${svn.branch.url}&quot; &quot;${temp.project.source.dir}&quot;" />
+		</svn>
+	</target>
+	
+	<target name="svn_check_conflicts">
+		<property name="last.executed.target" value="SVN code conflicts"/>
+		<property name="conflicts_file" value="${temp.sourcecode.dir}\${project.type}\conflicts.txt" />
+		<delete if="${file::exists(conflicts_file)}" file="${conflicts_file}" />
+		<exec program = "svn" workingdir="${temp.project.source.dir}" output="${conflicts_file}">
+			<arg line="stat" />
+		</exec>
+		<property name="temp.conflictexists" value="FALSE" />
+		<foreach item="Line" in="${conflicts_file}" property="fileline" if="${file::exists(conflicts_file)}" >
+			<if test="${string::starts-with(fileline,'C')}">
+				<property name="fileline.conflict" value="${string::substring(fileline,7,string::get-length(fileline)-7)}" />
+				<echo message="Warning file ${fileline.conflict} is conflicted" />
+				<property name="temp.conflictexists" value="TRUE" />
+			</if>
+		</foreach>
+		<fail if="${temp.conflictexists}" message="One or more files is conflicted, see messages above" />
+	</target>
+	
+	<target name="svn_non_vers">
+		<property name="last.executed.target" value="SVN non version file remove"/>
+		<property name="non_vers_file" value="${temp.sourcecode.dir}\${project.type}\remove_non_vers.txt" />
+		<delete if="${file::exists(non_vers_file)}" file="${non_vers_file}" />
+		<exec program = "svn" workingdir="${temp.project.source.dir}" output="${non_vers_file}">
+			<arg line="stat --no-ignore" />
+		</exec>
+		<foreach item="Line" in="${non_vers_file}" property="fileline"
+			if="${file::exists(non_vers_file)}" >
+			<if test="${string::starts-with(fileline,'?') or string::starts-with(fileline,'I')}">
+				<property name="fileline.delete" value="${string::substring(fileline,7,string::get-length(fileline)-7)}" />
+				<echo message="Deleting non-versioned file ${fileline.delete}" />
+				<delete dir="${temp.project.source.dir}/${fileline.delete}" />
+				<delete if="${file::exists(temp.project.source.dir+'/'+fileline.delete)}" file="${temp.project.source.dir}/${fileline.delete}" />
+			</if>
+		</foreach>
+	</target>
+	
+	<!-- End SVN Task Sections -->
